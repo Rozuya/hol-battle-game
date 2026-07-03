@@ -22,7 +22,7 @@
 </head>
 <body>
 
-    <!-- Choix Personnage (Écran principal maintenant) -->
+    <!-- Choix Personnage -->
     <div class="container" id="selection-screen">
         <h1>Choisis ton héros</h1>
         <div class="roster" id="roster"></div>
@@ -47,7 +47,7 @@
     </div>
 
     <script>
-        // On récupère la difficulté sauvegardée dans difficulte.html
+        // Récupère la difficulté choisie dans difficulte.html
         const diff = localStorage.getItem('diff') || 'normal'; 
         let pHP=150, eHP=150, active=true;
         const heroes = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
@@ -62,7 +62,7 @@
             'ulti': { desc: '40 Dmg (6 CD)', cdMax: 6, currentCd: 0 }
         };
 
-        // Génération personnages au chargement
+        // Génération personnages
         const r = document.getElementById('roster');
         heroes.forEach(n => {
             let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
@@ -77,7 +77,7 @@
             const others = heroes.filter(h => h !== name);
             document.getElementById('e-name').innerText = others[Math.floor(Math.random() * others.length)];
             
-            // Masquage dynamique
+            // Masquage dynamique des compétences selon difficulté
             const skills = ['brise', 'bigHeal', 'stun', 'toxic', 'ulti'];
             skills.forEach(s => {
                 let btn = document.getElementById('s-' + s);
@@ -97,7 +97,6 @@
             }
         }
 
-        // ... (le reste des fonctions play, iaTurn, updateUI reste identique)
         function play(action) {
             if(!active) return;
             if(action === 'heal') pHP = Math.min(150, pHP + 20);
