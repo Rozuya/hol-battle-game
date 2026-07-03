@@ -3,24 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="style.css">
-    <title>Combat en cours</title>
+    <title>Combat - house-of-laura-tcg</title>
 </head>
 <body>
     <div class="container">
-        <h1>COMBAT 3 VS 3</h1>
+        <h1>HOUSE-OF-LAURA-TCG : COMBAT</h1>
         <div id="diff-label"></div>
-
         <div class="battle-arena">
             <div class="team-zone">
                 <h3>VOTRE ÉQUIPE</h3>
                 <div id="my-team"></div>
             </div>
             <div class="team-zone">
-                <h3>ENNEMIS</h3>
+                <h3>ENNEMIS (Clique pour attaquer)</h3>
                 <div id="enemy-team"></div>
             </div>
         </div>
-        
         <br>
         <button onclick="location.reload()" class="btn">RELANCER LE COMBAT</button>
         <a href="index.html" class="btn">QUITTER</a>
@@ -28,32 +26,42 @@
 
     <script>
         const heroes = ["HOL Omass", "K974YT", "HOL Rozuya", "House of Laura", "Dark Mortel", "HOL Tony"];
-        
-        // Initialisation
         const params = new URLSearchParams(window.location.search);
         const diff = params.get('diff') || 'normal';
-        const hp = diff === 'facile' ? 150 : (diff === 'difficile' ? 50 : 100);
-        document.getElementById('diff-label').innerText = "Difficulté : " + diff.toUpperCase() + " (" + hp + " HP)";
+        let maxHP = diff === 'facile' ? 150 : (diff === 'difficile' ? 50 : 100);
+        let enemyHP = {};
 
-        // Génération
         let shuffled = heroes.sort(() => 0.5 - Math.random());
         let myTeam = shuffled.slice(0, 3);
         let enemyTeam = shuffled.slice(3, 6);
 
-        function renderTeam(team, elementId) {
-            const container = document.getElementById(elementId);
-            team.forEach(hero => {
-                container.innerHTML += `
-                    <div class="fighter">
-                        ${hero}
-                        <div class="hp-bar"><div class="hp-fill" style="width: 100%"></div></div>
-                        <small>${hp} / ${hp} HP</small>
+        function initGame() {
+            document.getElementById('diff-label').innerText = "Difficulté : " + diff.toUpperCase();
+            const myContainer = document.getElementById('my-team');
+            myTeam.forEach(h => myContainer.innerHTML += `<div class="fighter">${h}<br>${maxHP} HP</div>`);
+
+            const enemyContainer = document.getElementById('enemy-team');
+            enemyTeam.forEach(h => {
+                enemyHP[h] = maxHP;
+                enemyContainer.innerHTML += `
+                    <div class="fighter enemy-fighter" id="card-${h}" onclick="attaquer('${h}')">
+                        ${h}
+                        <div class="hp-bar"><div class="hp-fill" id="hp-${h}" style="width: 100%"></div></div>
+                        <span id="text-${h}">${maxHP} HP</span>
                     </div>`;
             });
         }
 
-        renderTeam(myTeam, 'my-team');
-        renderTeam(enemyTeam, 'enemy-team');
+        function attaquer(nom) {
+            if (enemyHP[nom] > 0) {
+                enemyHP[nom] -= 20;
+                if (enemyHP[nom] < 0) enemyHP[nom] = 0;
+                document.getElementById('hp-' + nom).style.width = (enemyHP[nom] / maxHP * 100) + "%";
+                document.getElementById('text-' + nom).innerText = enemyHP[nom] + " HP";
+                if (enemyHP[nom] === 0) document.getElementById('card-' + nom).classList.add('defeated');
+            }
+        }
+        initGame();
     </script>
 </body>
 </html>
