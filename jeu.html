@@ -24,6 +24,11 @@
         button.skill:disabled { background: #222; opacity: 0.5; cursor: not-allowed; color: #666; }
         
         #log { height: 80px; background: #000; padding: 10px; margin-bottom: 15px; border-radius: 6px; overflow-y: auto; font-size: 0.85rem; border: 1px solid #333; }
+
+        /* Écran de fin */
+        #end-screen { text-align: center; display: none; }
+        #end-title { font-size: 2rem; margin-bottom: 20px; }
+        .btn-replay { background: #9146ff; border: none; padding: 15px 30px; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -52,8 +57,13 @@
         </div>
     </div>
 
+    <!-- Écran de Fin -->
+    <div class="container" id="end-screen">
+        <h1 id="end-title">Victoire !</h1>
+        <button class="btn-replay" onclick="location.reload()">Rejouer</button>
+    </div>
+
     <script>
-        // Récupération de la difficulté via localStorage
         const diff = localStorage.getItem('diff') || 'normal'; 
         let pHP=150, eHP=150, active=true;
         const heroes = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
@@ -68,7 +78,6 @@
             'ulti': { desc: '40 Dmg (6 CD)', cdMax: 6, currentCd: 0 }
         };
 
-        // Remplir le roster
         const r = document.getElementById('roster');
         heroes.forEach(n => {
             let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
@@ -83,21 +92,21 @@
             const others = heroes.filter(h => h !== name);
             document.getElementById('e-name').innerText = others[Math.floor(Math.random() * others.length)];
             
-            // Masquage automatique selon difficulté
             const skills = ['brise', 'bigHeal', 'stun', 'toxic', 'ulti'];
-            skills.forEach(s => { document.getElementById('s-' + s).style.display = 'none'; });
+            skills.forEach(s => { if(document.getElementById('s-' + s)) document.getElementById('s-' + s).style.display = 'none'; });
 
-            if(diff !== 'facile') {
-                document.getElementById('s-brise').style.display = 'flex';
-                document.getElementById('s-bigHeal').style.display = 'flex';
-            }
-            if(diff === 'difficile' || diff === 'expert') {
-                document.getElementById('s-stun').style.display = 'flex';
-                document.getElementById('s-toxic').style.display = 'flex';
-            }
-            if(diff === 'expert') {
-                document.getElementById('s-ulti').style.display = 'flex';
-            }
+            if(diff !== 'facile') { document.getElementById('s-brise').style.display = 'flex'; document.getElementById('s-bigHeal').style.display = 'flex'; }
+            if(diff === 'difficile' || diff === 'expert') { document.getElementById('s-stun').style.display = 'flex'; document.getElementById('s-toxic').style.display = 'flex'; }
+            if(diff === 'expert') { document.getElementById('s-ulti').style.display = 'flex'; }
+        }
+
+        // Nouvelle fonction pour gérer la fin de partie proprement
+        function endGame(isWin) {
+            document.getElementById('battle-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+            const title = document.getElementById('end-title');
+            title.innerText = isWin ? "VICTOIRE !" : "DÉFAITE...";
+            title.style.color = isWin ? "#2ecc71" : "#e74c3c";
         }
 
         function play(action) {
@@ -109,8 +118,9 @@
             skillConfig[action].currentCd = skillConfig[action].cdMax;
             active = false;
             updateUI();
-            if(eHP > 0) setTimeout(iaTurn, 1000);
-            else alert("Victoire !");
+            
+            if(eHP <= 0) endGame(true); // VICTOIRE
+            else setTimeout(iaTurn, 1000);
         }
 
         function iaTurn() {
@@ -118,7 +128,9 @@
                 pHP = Math.max(0, pHP - 15);
                 for(let k in skillConfig) if(skillConfig[k].currentCd > 0) skillConfig[k].currentCd--;
                 updateUI();
-                active = true;
+                
+                if(pHP <= 0) endGame(false); // DÉFAITE
+                else active = true;
             }
         }
 
