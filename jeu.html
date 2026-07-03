@@ -2,49 +2,31 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Arena</title>
+    <title>Jeu en cours</title>
     <style>
-        /* Animation fond slide identique */
         @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        body { margin: 0; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-               background: linear-gradient(-45deg, #060608, #18181b, #4c1d95, #060608); background-size: 400% 400%; animation: gradient 15s ease infinite; color: white; }
-
-        .zone { display: flex; justify-content: center; gap: 20px; padding: 20px; background: rgba(0,0,0,0.3); }
-        .card { width: 140px; height: 190px; background: #121212; border: 3px solid #444; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .btn { padding: 15px 30px; background: #9146ff; border: none; color: white; cursor: pointer; margin: 5px; border-radius: 6px; }
-        #quit-btn { background: #b91c1c; position: absolute; top: 10px; right: 10px; padding: 10px 20px; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; height: 100vh; color: white; display: flex; flex-direction: column;
+               background: linear-gradient(-45deg, #0f172a, #312e81, #1e1b4b, #0f172a); background-size: 400% 400%; animation: gradient 15s ease infinite; }
+        
+        #header { display: flex; justify-content: space-between; padding: 20px; background: rgba(0,0,0,0.2); }
+        .btn-quit { background: #991b1b; padding: 10px 20px; border: none; color: white; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        
+        .arena { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px; }
+        .card { width: 120px; height: 160px; background: rgba(255,255,255,0.1); border: 2px solid #a78bfa; border-radius: 10px; display: flex; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
 
-    <div id="setup" style="text-align:center; padding-top:20vh;">
-        <h1>CHOISIR DIFFICULTÉ</h1>
-        <button class="btn" onclick="init()">COMMENCER</button>
+    <div id="header">
+        <div>HOUSE OF LAURA - ARÈNE</div>
+        <button class="btn-quit" onclick="window.location.href='index.html'">QUITTER</button>
     </div>
 
-    <div id="game-board" style="display:none; height:100vh; display:flex; flex-direction:column; justify-content:space-between;">
-        <button id="quit-btn" onclick="window.location.href='index.html'">QUITTER</button>
-        <div id="opponent-zone" class="zone"></div>
-        <div style="text-align:center;"><h2>Combat en cours</h2><div id="actions"></div></div>
-        <div id="player-zone" class="zone"></div>
+    <div class="arena">
+        <div class="card">Ennemi</div>
+        <div style="font-size: 1.5rem;">VS</div>
+        <div class="card">Toi</div>
     </div>
 
-    <script>
-        const ROSTER = [
-            {n: "Laura", hp: 100}, {n: "Tony", hp: 100}, {n: "Rozuya", hp: 100},
-            {n: "Omass", hp: 100}, {n: "K974YT", hp: 100}, {n: "Cygne", hp: 100}
-        ];
-        function init() {
-            document.getElementById('setup').style.display = 'none';
-            document.getElementById('game-board').style.display = 'flex';
-            render();
-        }
-        function render() {
-            document.getElementById('player-zone').innerHTML = ROSTER.slice(0,3).map(c => 
-                `<div class="card"><strong>${c.n}</strong><p>${c.hp} HP</p></div>`).join('');
-            document.getElementById('opponent-zone').innerHTML = ROSTER.slice(3,6).map(c => 
-                `<div class="card"><strong>${c.n}</strong><p>${c.hp} HP</p></div>`).join('');
-        }
-    </script>
 </body>
 </html>
