@@ -1,16 +1,63 @@
-<script>
-        let currentDifficulty = 'normal';
-        let player, enemy, gameActive = true;
-        const characters = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOL Battle Game - Arène</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .container { max-width: 600px; margin: 50px auto; background: #1f1f23; padding: 20px; border-radius: 12px; border: 1px solid #303032; }
+        .diff-grid { display: block; margin-top: 20px; }
+        .btn-diff { display: block; width: 100%; padding: 15px; margin: 12px 0; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; color: white; transition: transform 0.1s; }
+        .btn-diff:hover { transform: scale(1.02); }
+        .diff-facile { background: #2ecc71; }
+        .diff-normal { background: #3498db; }
+        .diff-difficile { background: #e67e22; }
+        .diff-expert { background: #e74c3c; }
+        .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .character-card { background: #3a3a3c; padding: 15px; border-radius: 6px; cursor: pointer; text-align: center; color: white; }
+        .character-card:hover { background: #9146ff; }
+        .arena { display: flex; justify-content: space-between; margin: 20px 0; }
+        .health-bar-bg { width: 100%; background: #0e0e10; height: 20px; border-radius: 10px; overflow: hidden; }
+        .health-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.3s; }
+    </style>
+</head>
+<body>
 
-        class Fighter {
-            constructor(name, maxHp) { 
-                this.name = name; 
-                this.maxHp = maxHp; 
-                this.hp = maxHp; 
-                this.cooldowns = { briseDef: 0, stun: 0, antiHeal: 0, bigHeal: 0 }; 
-            }
-        }
+    <div class="container" id="difficulty-screen">
+        <h1>Choisis la Difficulté</h1>
+        <div class="diff-grid">
+            <button class="btn-diff diff-facile" onclick="setDifficulty('facile')">🟢 Facile</button>
+            <button class="btn-diff diff-normal" onclick="setDifficulty('normal')">🟡 Normal</button>
+            <button class="btn-diff diff-difficile" onclick="setDifficulty('difficile')">🟠 Difficile</button>
+            <button class="btn-diff diff-expert" onclick="setDifficulty('expert')">🔴 Expert</button>
+        </div>
+        <button style="background: #333; width:100%; padding:12px; border-radius:6px; border:none; color:white; cursor:pointer;" onclick="window.location.href='index.html'">Retour au Menu</button>
+    </div>
+
+    <div class="container" id="selection-screen" style="display: none;">
+        <h1 id="diff-title">Choisis ton Combattant</h1>
+        <div class="roster" id="roster"></div>
+        <button style="background: #333; margin-top:20px; width: 100%; padding:10px; border:none; border-radius:6px; color:white; cursor:pointer;" onclick="backToDifficulty()">Retour</button>
+    </div>
+
+    <div class="container" id="battle-screen" style="display: none;">
+        <h2 id="battle-title">Combat en cours</h2>
+        <div class="arena">
+            <div><h3 id="player-name">Joueur</h3><div class="health-bar-bg"><div class="health-fill" id="player-hp-bar"></div></div><p id="player-hp-text">150/150</p></div>
+            <div><h3 id="enemy-name">IA</h3><div class="health-bar-bg"><div class="health-fill" id="enemy-hp-bar"></div></div><p id="enemy-hp-text">150/150</p></div>
+        </div>
+        <div id="combat-log" style="height: 100px; overflow-y: auto; background: #0e0e10; padding: 10px; margin: 10px 0; color: #ccc;"></div>
+        <div id="action-buttons">
+            <button onclick="executeAction('basic')">Attaque</button>
+            <button onclick="executeAction('smallHeal')">Soin</button>
+        </div>
+    </div>
+
+    <script>
+        let currentDifficulty = 'normal';
+        let player = { hp: 150, maxHp: 150 }, enemy = { hp: 150, maxHp: 150 };
+        const characters = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
 
         function setDifficulty(diff) {
             currentDifficulty = diff;
@@ -39,39 +86,22 @@
         function startGame(selectedChar) {
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('battle-screen').style.display = 'block';
-            
-            player = new Fighter(selectedChar, 150);
-            enemy = new Fighter("IA Ennemie", 150);
-            
-            // Réinitialisation forcée des boutons
-            const buttons = ['btn-briseDef', 'btn-bigHeal', 'btn-stun', 'btn-antiHeal'];
-            buttons.forEach(id => {
-                let btn = document.getElementById(id);
-                btn.style.display = (currentDifficulty === 'facile' || (currentDifficulty === 'normal' && (id === 'btn-stun' || id === 'btn-antiHeal'))) ? 'none' : 'block';
-                btn.disabled = false; // ON ACTIVE BIEN LES BOUTONS ICI
-            });
-
-            log("Combat lancé ! À toi de jouer.");
+            document.getElementById('player-name').innerText = selectedChar;
+            log("Le combat commence contre l'IA !");
         }
 
-        function log(msg) { 
-            const logDiv = document.getElementById('combat-log');
-            logDiv.innerHTML = `<div>${msg}</div>` + logDiv.innerHTML;
+        function log(msg) {
+            document.getElementById('combat-log').innerHTML = `<div>${msg}</div>` + document.getElementById('combat-log').innerHTML;
         }
 
-        // C'est cette fonction qui est appelée au clic sur les boutons
         function executeAction(action) {
-            if (!gameActive) return;
-            
-            // Exemple de logique pour l'attaque
             if (action === 'basic') {
-                log("⚔️ Tu infliges des dégâts basiques !");
                 enemy.hp -= 10;
-            } else {
-                log(`⚡ Utilisation de la compétence : ${action}`);
+                document.getElementById('enemy-hp-text').innerText = `${enemy.hp}/150`;
+                document.getElementById('enemy-hp-bar').style.width = (enemy.hp/150*100) + "%";
+                log("Tu as attaqué l'IA (-10 PV) !");
             }
-            
-            // Ici tu mets la mise à jour de ton interface
-            document.getElementById('enemy-hp-text').innerText = `${enemy.hp}/150`;
         }
     </script>
+</body>
+</html>
