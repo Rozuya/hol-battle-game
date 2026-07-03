@@ -2,18 +2,38 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Sélection du Héros</title>
+    <title>Combat</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Sélectionne ton héros</h1>
-        <a href="difficulte.html" class="btn">HOL Omass (100 HP)</a>
-        <a href="difficulte.html" class="btn">K974YT (100 HP)</a>
-        <a href="difficulte.html" class="btn">HOL Rozuya (100 HP)</a>
-        <a href="difficulte.html" class="btn">House of Laura (100 HP)</a>
-        <br>
-        <a href="index.html" style="color: #ccc; text-decoration: none;">Retour au menu</a>
+        <h1>Combat !</h1>
+        <p id="diff-info"></p>
+        
+        <div class="team-grid">
+            <div><h3>Toi</h3><div id="my-team"></div></div>
+            <div><h3>Ennemi</h3><div id="enemy-team"></div></div>
+        </div>
+        
+        <a href="index.html" class="btn">Retour au menu</a>
     </div>
+
+    <script>
+        // 1. Liste des héros
+        const heroes = ["HOL Omass", "K974YT", "HOL Rozuya", "House of Laura", "Dark Mortel", "HOL Tony"];
+        
+        // 2. Mélanger et séparer (3 vs 3)
+        let shuffled = heroes.sort(() => 0.5 - Math.random());
+        let myTeam = shuffled.slice(0, 3);
+        let enemyTeam = shuffled.slice(3, 6);
+
+        // 3. Affichage
+        document.getElementById('my-team').innerHTML = myTeam.map(h => `<div class="hero-card">${h}</div>`).join('');
+        document.getElementById('enemy-team').innerHTML = enemyTeam.map(h => `<div class="hero-card">${h}</div>`).join('');
+
+        // 4. Afficher difficulté
+        const params = new URLSearchParams(window.location.search);
+        document.getElementById('diff-info').innerText = "Difficulté choisie : " + (params.get('diff') || "Normal");
+    </script>
 </body>
 </html>
