@@ -6,100 +6,98 @@
     <style>
         body { background: #0e0e10; color: white; font-family: sans-serif; margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         .container { width: 90%; max-width: 500px; background: #1f1f23; padding: 20px; border-radius: 12px; }
-        /* Style modal */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); }
-        .modal-content { background: #18181c; margin: 10% auto; padding: 20px; border: 2px solid #9146ff; border-radius: 12px; width: 85%; max-width: 400px; color: white; position: relative; }
-        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; }
-        
+        .btn-diff { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; }
         .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .character-card { background: #3a3a3c; padding: 15px; border-radius: 6px; cursor: pointer; text-align: center; }
+        .character-card:hover { background: #9146ff; }
         .arena { display: flex; justify-content: space-between; margin-bottom: 20px; text-align: center; }
         .health-bar-bg { width: 100%; background: #000; height: 15px; border-radius: 5px; }
         .health-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s; }
+        
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button.skill { padding: 10px; cursor: pointer; background: #3a3a3c; color: white; border: none; border-radius: 6px; }
-        button.skill:disabled { background: #222; opacity: 0.5; cursor: not-allowed; }
-        #log { height: 120px; background: #000; padding: 10px; margin-bottom: 10px; border-radius: 6px; overflow-y: auto; font-size: 0.9rem; }
+        button.skill { padding: 10px; cursor: pointer; background: #3a3a3c; color: white; border: none; border-radius: 6px; display: flex; flex-direction: column; align-items: center; }
+        button.skill strong { font-size: 1rem; }
+        button.skill small { font-size: 0.75rem; color: #aaa; margin-top: 2px; }
+        button.skill:disabled { background: #222; opacity: 0.6; cursor: not-allowed; color: #666; }
+        
+        #log { height: 100px; background: #000; padding: 10px; margin-bottom: 15px; border-radius: 6px; overflow-y: auto; font-size: 0.85rem; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
+    <!-- Choix Difficulté -->
+    <div class="container" id="difficulty-screen">
+        <h1>Choisis la Difficulté</h1>
+        <button class="btn-diff" style="background:#2ecc71" onclick="setDiff('facile')">Facile</button>
+        <button class="btn-diff" style="background:#3498db" onclick="setDiff('normal')">Normal</button>
+        <button class="btn-diff" style="background:#e67e22" onclick="setDiff('difficile')">Difficile</button>
+        <button class="btn-diff" style="background:#e74c3c" onclick="setDiff('expert')">Expert</button>
+    </div>
+
     <!-- Choix Personnage -->
-    <div class="container" id="selection-screen">
+    <div class="container" id="selection-screen" style="display: none;">
         <h1>Choisis ton héros</h1>
         <div class="roster" id="roster"></div>
     </div>
 
     <!-- Combat -->
     <div class="container" id="battle-screen" style="display: none;">
-        <button style="background:transparent; border:1px solid #9146ff; color:#9146ff; padding:5px 10px; border-radius:4px; margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('info-modal').style.display='block'">📜 Voir Infos Compétences</button>
-        
         <div class="arena">
             <div><h3 id="p-name">Joueur</h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><p id="p-hp">150/150</p></div>
             <div><h3 id="e-name">Ennemi</h3><div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div><p id="e-hp">150/150</p></div>
         </div>
         <div id="log"></div>
         <div class="action-grid" id="actions">
-            <button class="skill" id="s-basic" onclick="play('basic')">Attaque</button>
-            <button class="skill" id="s-heal" onclick="play('heal')">Soin</button>
-            <button class="skill" id="s-brise" onclick="play('brise')">Brise Armure</button>
-            <button class="skill" id="s-bigHeal" onclick="play('bigHeal')">Gros Soin</button>
-            <button class="skill" id="s-stun" onclick="play('stun')">Ban Chat</button>
-            <button class="skill" id="s-toxic" onclick="play('toxic')">Toxicité</button>
-            <button class="skill" id="s-ulti" onclick="play('ulti')">ULTI</button>
-        </div>
-    </div>
-
-    <!-- Modale Infos -->
-    <div id="info-modal" class="modal" onclick="this.style.display='none'">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <span class="close-btn" onclick="document.getElementById('info-modal').style.display='none'">&times;</span>
-            <h2>Statistiques Compétences</h2>
-            <table style="width:100%; border-collapse: collapse; color: #ddd; font-size: 0.9rem;">
-                <tr style="border-bottom:1px solid #444; color:#fff;"><th>Compétence</th><th>Effet</th><th>Recharge</th></tr>
-                <tr><td style="padding:5px;">Attaque</td><td>15 Dmg</td><td>0 tour</td></tr>
-                <tr><td style="padding:5px;">Soin</td><td>+20 PV</td><td>2 tours</td></tr>
-                <tr><td style="padding:5px;">Brise Armure</td><td>25 Dmg</td><td>2 tours</td></tr>
-                <tr><td style="padding:5px;">Gros Soin</td><td>+50 PV</td><td>3 tours</td></tr>
-                <tr><td style="padding:5px;">Ban Chat</td><td>Neutralise</td><td>4 tours</td></tr>
-                <tr><td style="padding:5px;">Toxicité</td><td>Poison</td><td>4 tours</td></tr>
-                <tr><td style="padding:5px;">ULTI</td><td>40 Dmg</td><td>6 tours</td></tr>
-            </table>
+            <button class="skill" id="s-basic" onclick="play('basic')"><strong>Attaque</strong><small>15 Dmg (0 CD)</small></button>
+            <button class="skill" id="s-heal" onclick="play('heal')"><strong>Soin</strong><small>+20 PV (2 CD)</small></button>
+            <button class="skill" id="s-brise" onclick="play('brise')"><strong>Brise Armure</strong><small>25 Dmg (2 CD)</small></button>
+            <button class="skill" id="s-bigHeal" onclick="play('bigHeal')"><strong>Gros Soin</strong><small>+50 PV (3 CD)</small></button>
+            <button class="skill" id="s-stun" onclick="play('stun')"><strong>Ban Chat</strong><small>Neutralise (4 CD)</small></button>
+            <button class="skill" id="s-toxic" onclick="play('toxic')"><strong>Toxicité</strong><small>Poison (4 CD)</small></button>
+            <button class="skill" id="s-ulti" onclick="play('ulti')"><strong>ULTI</strong><small>40 Dmg (6 CD)</small></button>
         </div>
     </div>
 
     <script>
-        const diff = localStorage.getItem('diff') || 'normal';
-        let pHP=150, eHP=150, active=true;
+        let diff = 'normal', pHP=150, eHP=150, active=true;
         const heroes = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
+        
+        // Stocke les infos de base pour pouvoir réinitialiser le texte après le cooldown
         const skillConfig = {
-            'basic': { cdMax: 0, currentCd: 0 },
-            'heal': { cdMax: 2, currentCd: 0 },
-            'brise': { cdMax: 2, currentCd: 0 },
-            'bigHeal': { cdMax: 3, currentCd: 0 },
-            'stun': { cdMax: 4, currentCd: 0 },
-            'toxic': { cdMax: 4, currentCd: 0 },
-            'ulti': { cdMax: 6, currentCd: 0 }
+            'basic': { desc: '15 Dmg (0 CD)', cdMax: 0, currentCd: 0 },
+            'heal': { desc: '+20 PV (2 CD)', cdMax: 2, currentCd: 0 },
+            'brise': { desc: '25 Dmg (2 CD)', cdMax: 2, currentCd: 0 },
+            'bigHeal': { desc: '+50 PV (3 CD)', cdMax: 3, currentCd: 0 },
+            'stun': { desc: 'Neutralise (4 CD)', cdMax: 4, currentCd: 0 },
+            'toxic': { desc: 'Poison (4 CD)', cdMax: 4, currentCd: 0 },
+            'ulti': { desc: '40 Dmg (6 CD)', cdMax: 6, currentCd: 0 }
         };
 
-        const r = document.getElementById('roster');
-        heroes.forEach(n => {
-            let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
-            d.onclick = () => start(n); r.appendChild(d);
-        });
+        function setDiff(d) {
+            diff = d;
+            document.getElementById('difficulty-screen').style.display = 'none';
+            document.getElementById('selection-screen').style.display = 'block';
+            let r = document.getElementById('roster');
+            heroes.forEach(n => {
+                let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
+                d.onclick = () => start(n); r.appendChild(d);
+            });
+        }
 
         function start(name) {
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('battle-screen').style.display = 'block';
             document.getElementById('p-name').innerText = name;
+            
             const others = heroes.filter(h => h !== name);
             document.getElementById('e-name').innerText = others[Math.floor(Math.random() * others.length)];
             
-            document.getElementById('s-brise').style.display = (diff === 'facile') ? 'none' : 'block';
-            document.getElementById('s-bigHeal').style.display = (diff === 'facile') ? 'none' : 'block';
-            document.getElementById('s-stun').style.display = (diff === 'difficile' || diff === 'expert') ? 'block' : 'none';
-            document.getElementById('s-toxic').style.display = (diff === 'difficile' || diff === 'expert') ? 'block' : 'none';
-            document.getElementById('s-ulti').style.display = (diff === 'expert') ? 'block' : 'none';
+            // Masquer selon diff
+            document.getElementById('s-brise').style.display = (diff === 'facile') ? 'none' : 'flex';
+            document.getElementById('s-bigHeal').style.display = (diff === 'facile') ? 'none' : 'flex';
+            document.getElementById('s-stun').style.display = (diff === 'difficile' || diff === 'expert') ? 'flex' : 'none';
+            document.getElementById('s-toxic').style.display = (diff === 'difficile' || diff === 'expert') ? 'flex' : 'none';
+            document.getElementById('s-ulti').style.display = (diff === 'expert') ? 'flex' : 'none';
         }
 
         function play(action) {
@@ -128,11 +126,18 @@
             document.getElementById('e-hp').innerText = eHP + "/150";
             document.getElementById('p-bar').style.width = (pHP/150*100) + "%";
             document.getElementById('e-bar').style.width = (eHP/150*100) + "%";
+            
             for(let k in skillConfig) {
                 let btn = document.getElementById('s-' + k);
                 if(btn) {
-                    btn.disabled = (skillConfig[k].currentCd > 0);
-                    btn.style.opacity = (skillConfig[k].currentCd > 0) ? "0.5" : "1";
+                    let small = btn.querySelector('small');
+                    if (skillConfig[k].currentCd > 0) {
+                        btn.disabled = true;
+                        small.innerText = "Recharge: " + skillConfig[k].currentCd;
+                    } else {
+                        btn.disabled = false;
+                        small.innerText = skillConfig[k].desc;
+                    }
                 }
             }
         }
