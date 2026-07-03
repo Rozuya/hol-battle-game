@@ -2,88 +2,51 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>House of Laura | Accueil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <title>House of Laura | Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --bg-base: #0e0e10; 
-            --bg-panel: #18181b; 
-            --twitch-purple: #9146ff; 
-            --text-main: #ffffff; 
-            --text-muted: #adadb8; 
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            background-color: var(--bg-base); 
-            color: var(--text-main); 
-            font-family: 'Roboto', sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-        }
-        .container { 
-            background: var(--bg-panel); 
-            width: 100%; 
-            max-width: 480px; 
-            padding: 40px; 
-            border-radius: 12px; 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); 
-            text-align: center; 
-        }
-        .header h1 { 
-            font-family: 'Rajdhani', sans-serif; 
-            font-size: 3rem; 
-            text-transform: uppercase; 
-            margin-bottom: 30px; 
-        }
-        .header h1 span { color: var(--twitch-purple); }
-        
-        .menu-btn { 
-            display: block; 
-            width: 100%; 
-            background: rgba(255, 255, 255, 0.05); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            color: var(--text-main); 
-            padding: 16px; 
-            margin-bottom: 15px; 
-            border-radius: 8px; 
-            font-family: 'Rajdhani', sans-serif; 
-            font-size: 1.3rem; 
-            font-weight: 700; 
-            text-transform: uppercase; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-        }
-        .menu-btn:hover { background: rgba(255, 255, 255, 0.1); }
-        .btn-primary { background: var(--twitch-purple); border-color: var(--twitch-purple); }
-        .btn-primary:hover { background: #a970ff; border-color: #a970ff; }
-        
-        .footer { 
-            margin-top: 30px; 
-            font-size: 0.85rem; 
-            color: var(--text-muted); 
-            opacity: 0.7; 
-        }
+        body { background: #0e0e10; color: white; font-family: 'Rajdhani', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .box { background: #18181b; padding: 40px; border-radius: 12px; text-align: center; width: 400px; border: 1px solid #333; }
+        h1 { font-size: 3rem; text-transform: uppercase; margin-bottom: 20px; }
+        h1 span { color: #9146ff; }
+        button { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #27272a; border: 1px solid #444; color: white; cursor: pointer; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; border-radius: 6px; transition: 0.3s; }
+        button:hover { background: #9146ff; border-color: #9146ff; }
+        .hidden { display: none; }
+        .content { font-size: 1.1rem; color: #ccc; margin-bottom: 20px; line-height: 1.6; text-align: left; }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <div class="header">
-            <h1>House of <span>Laura</span></h1>
+    <div class="box" id="menu-container">
+        <!-- Menu Principal -->
+        <div id="view-main">
+            <h1>HOUSE OF <span>LAURA</span></h1>
+            <button onclick="window.location.href='jeu.html'">Lancer le jeu (3v3)</button>
+            <button onclick="showView('view-rules')">Règles du jeu</button>
+            <button onclick="showView('view-params')">Paramètres</button>
         </div>
 
-        <button class="menu-btn btn-primary" onclick="window.location.href='jeu.html'">Lancer le Jeu (3v3)</button>
-        <button class="menu-btn">Règles du Jeu</button>
-        <button class="menu-btn">Paramètres</button>
+        <!-- Règles -->
+        <div id="view-rules" class="hidden">
+            <h1>Règles</h1>
+            <div class="content">Chaque équipe reçoit 3 héros aléatoires. Cliquez sur votre héros pour le sélectionner, puis sur l'ennemi pour attaquer. Éliminez toute l'équipe adverse pour gagner !</div>
+            <button onclick="showView('view-main')">Retour</button>
+        </div>
 
-        <div class="footer">
-            &copy; 2026 House of Laura - Tous droits réservés.
+        <!-- Paramètres -->
+        <div id="view-params" class="hidden">
+            <h1>Paramètres</h1>
+            <div class="content">Volume : 100%<br>Qualité : Élevée<br>Version : 2026.0.1</div>
+            <button onclick="showView('view-main')">Retour</button>
         </div>
     </div>
 
+    <script>
+        function showView(id) {
+            document.getElementById('view-main').classList.add('hidden');
+            document.getElementById('view-rules').classList.add('hidden');
+            document.getElementById('view-params').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
