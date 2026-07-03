@@ -3,48 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>House of Laura - Le Jeu</title>
+    <title>House of Laura - Accueil</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles spécifiques à la page d'accueil (pour intégrer le design proprement) */
+        :root {
+            --twitch-purple: #9146ff;
+            --bg-dark: #0e0e10;
+            --card-bg: #1f1f23;
+            --text-color: #efeff1;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-color);
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .menu-container {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            border: 1px solid #303032;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: var(--twitch-purple);
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-btn {
+            background: var(--twitch-purple);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            margin: 10px 0;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .menu-btn:hover {
+            background: #772ce8;
+            transform: translateY(-2px);
+        }
+
+        .menu-btn.secondary {
+            background: #3a3a3c;
+        }
+
+        .menu-btn.secondary:hover {
+            background: #4a4a4c;
+        }
+
+        /* ========================================================
+           ✨ LE POPUP (FENÊTRE MODALE) ASSEZ PROPRE ET ADAPTÉ
+           ======================================================== */
+        .modal {
+            display: none; /* Masqué par défaut */
+            position: fixed;
+            z-index: 1000; /* Passe au-dessus de tout le reste */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); /* Fond noir transparent */
+            backdrop-filter: blur(6px); /* Effet flouté à l'arrière-plan */
+        }
+
+        .modal-content {
+            background-color: #18181c;
+            margin: 10% auto;
+            padding: 25px;
+            border: 2px solid var(--twitch-purple);
+            border-radius: 12px;
+            width: 85%;
+            max-width: 550px;
+            color: var(--text-color);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            animation: popupApparition 0.3s ease-in-out;
+            max-height: 75vh;
+            overflow-y: auto; /* Permet d'avoir une barre de défilement SI le texte est trop grand */
+        }
+
+        /* Petite animation sympa quand le popup s'ouvre */
+        @keyframes popupApparition {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Le fameux bouton de fermeture (la croix "X") */
+        .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            color: #adadb8;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #ffffff;
+        }
+
+        /* Contenu du popup */
+        .modal h2 {
+            color: var(--twitch-purple);
+            margin-top: 0;
+            border-bottom: 2px solid #303032;
+            padding-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .modal h3 {
+            color: #ffd700;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .modal ul {
+            text-align: left;
+            padding-left: 20px;
+            line-height: 1.6;
+        }
+
+        .modal li {
+            margin-bottom: 8px;
+        }
+
+        .news-date {
+            font-size: 0.85rem;
+            color: #adadb8;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>House of Laura<br>Battle Arena</h1>
+    <div class="menu-container">
+        <h1>House of Laura</h1>
         
-        <button onclick="window.location.href='difficulte.html'">🎮 Lancer le jeu</button><br>
-        <button onclick="openModal('modal-regles')">📜 Règles</button><br>
-        <button onclick="openModal('modal-actus')">📰 Actus</button>
+        <button class="menu-btn" onclick="window.location.href='jeu.html'">🎮 Jouer</button>
+        <button class="menu-btn secondary" onclick="window.location.href='difficulte.html'">⚙️ Difficulté</button>
+        
+        <button class="menu-btn secondary" onclick="openModal()">📜 Règles & Actus</button>
     </div>
 
-    <!-- Modale Règles -->
-    <div class="overlay" id="overlay" onclick="closeModals()"></div>
-    
-    <div class="modal" id="modal-regles">
-        <h2>Les Règles du jeu</h2>
-        <p>1. Choisissez votre membre de la team <strong>House of Laura</strong>.</p>
-        <p>2. Affrontez une IA redoutable dans un combat au tour par tour.</p>
-        <p>3. Gérez vos points de vie : attaquez ou soignez-vous stratégiquement !</p>
-        <p><em>En mode Expert, l'IA est sans pitié. Bonne chance !</em></p>
-        <button onclick="closeModals()">Fermer</button>
-    </div>
+    <div id="rules-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            
+            <h2>📜 Règles & Actualités</h2>
+            
+            <h3>🎮 Règles de l'Arène</h3>
+            <ul>
+                <li><strong>Choisis ton Héros :</strong> Prends le contrôle d'un membre de la commu pour affronter l'IA.</li>
+                <li><strong>Système de Difficulté :</strong> En mode <em>Facile</em>, tu as 2 compétences. En mode <em>Normal</em> tu passes à 4. En modes <em>Difficile</em> et <em>Expert</em>, la grille complète de 6 compétences s'active !</li>
+                <li><strong>Gère les Altérations :</strong> Utilise le <strong>Brise-Armure</strong> pour infliger +50% de dégâts, le <strong>Ban Chat</strong> pour faire passer un tour à l'ennemi, ou la <strong>Toxicité</strong> pour lui interdire de se soigner !</li>
+            </ul>
 
-    <!-- Modale Actus -->
-    <div class="modal" id="modal-actus">
-        <h2>Dernières Actus</h2>
-        <p>🔹 Bienvenue sur la v1.0 du jeu House of Laura !</p>
-        <p>🔹 N'oublie pas de follow la chaîne sur Twitch.</p>
-        <p>🔹 Bientôt : de nouveaux personnages et attaques spéciales !</p>
-        <button onclick="closeModals()">Fermer</button>
+            <h3>🔥 Actus du Site</h3>
+            <p class="news-date">Dernière mise à jour : v2.0</p>
+            <ul>
+                <li>🧠 <strong>IA Améliorée :</strong> L'ordinateur ne fait plus n'importe quoi, il réfléchit, anticipe et se soigne en priorité s'il descend sous la barre des 40% de PV !</li>
+                <li>⚡ <strong>Difficulté dynamique :</strong> L'interface de combat adapte automatiquement ses compétences à ton choix de difficulté.</li>
+                <li>💎 <strong>Design épuré :</strong> Intégration de cette fenêtre de dialogue "pop-up" pour ne pas surcharger l'écran principal.</li>
+            </ul>
+        </div>
     </div>
 
     <script>
-        function openModal(id) {
-            document.getElementById(id).style.display = 'block';
-            document.getElementById('overlay').style.display = 'block';
+        // Fonction pour afficher le popup
+        function openModal() {
+            document.getElementById('rules-modal').style.display = 'block';
         }
-        function closeModals() {
-            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-            document.getElementById('overlay').style.display = 'none';
+
+        // Fonction pour fermer le popup
+        function closeModal() {
+            document.getElementById('rules-modal').style.display = 'none';
+        }
+
+        // PETIT BONUS : Si le joueur clique en dehors de la boîte (sur le fond noir), ça ferme aussi le popup !
+        window.onclick = function(event) {
+            let modal = document.getElementById('rules-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
         }
     </script>
 </body>
