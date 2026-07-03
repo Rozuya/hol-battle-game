@@ -9,6 +9,7 @@
         .btn-diff { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; }
         .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .character-card { background: #3a3a3c; padding: 15px; border-radius: 6px; cursor: pointer; text-align: center; }
+        .character-card:hover { background: #9146ff; }
         .arena { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .health-bar-bg { width: 100%; background: #000; height: 15px; border-radius: 5px; }
         .health-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s; }
@@ -21,9 +22,10 @@
 
     <div class="container" id="difficulty-screen">
         <h1>Choisis la Difficulté</h1>
-        <button class="btn-diff" style="background:#2ecc71" onclick="init('facile')">Facile (2 Skills)</button>
-        <button class="btn-diff" style="background:#3498db" onclick="init('normal')">Normal (4 Skills)</button>
-        <button class="btn-diff" style="background:#e67e22" onclick="init('difficile')">Difficile (6 Skills)</button>
+        <button class="btn-diff" style="background:#2ecc71" onclick="init('facile')">Facile</button>
+        <button class="btn-diff" style="background:#3498db" onclick="init('normal')">Normal</button>
+        <button class="btn-diff" style="background:#e67e22" onclick="init('difficile')">Difficile</button>
+        <button class="btn-diff" style="background:#e74c3c" onclick="init('expert')">Expert</button>
     </div>
 
     <div class="container" id="selection-screen" style="display: none;">
@@ -44,6 +46,7 @@
             <button onclick="play('bigHeal')" id="b-bigHeal">Gros Soin</button>
             <button onclick="play('stun')" id="b-stun">Ban Chat</button>
             <button onclick="play('toxic')" id="b-toxic">Toxicité</button>
+            <button onclick="play('ulti')" id="b-ulti" style="background:#9146ff">⚡ ULTI</button>
         </div>
         <div id="end-menu" style="display:none; text-align:center; margin-top:20px;">
             <button onclick="location.reload()" style="background:#9146ff; width:100%;">Rejouer / Menu</button>
@@ -58,7 +61,8 @@
             document.getElementById('difficulty-screen').style.display = 'none';
             document.getElementById('selection-screen').style.display = 'block';
             let r = document.getElementById('roster');
-            ["Laura", "Tony", "Rozuya", "Omass"].forEach(n => {
+            const heroes = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
+            heroes.forEach(n => {
                 let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
                 d.onclick = () => start(n); r.appendChild(d);
             });
@@ -69,18 +73,20 @@
             document.getElementById('battle-screen').style.display = 'block';
             document.getElementById('p-name').innerText = name;
             
-            // Logique de visibilité des compétences (LE COEUR DU PROBLÈME)
-            document.getElementById('b-brise').style.display = (diff === 'normal' || diff === 'difficile') ? 'block' : 'none';
-            document.getElementById('b-bigHeal').style.display = (diff === 'normal' || diff === 'difficile') ? 'block' : 'none';
-            document.getElementById('b-stun').style.display = (diff === 'difficile') ? 'block' : 'none';
-            document.getElementById('b-toxic').style.display = (diff === 'difficile') ? 'block' : 'none';
+            // Logique de visibilité : plus la difficulté monte, plus on a de skills
+            document.getElementById('b-brise').style.display = (diff !== 'facile') ? 'block' : 'none';
+            document.getElementById('b-bigHeal').style.display = (diff !== 'facile') ? 'block' : 'none';
+            document.getElementById('b-stun').style.display = (diff === 'difficile' || diff === 'expert') ? 'block' : 'none';
+            document.getElementById('b-toxic').style.display = (diff === 'difficile' || diff === 'expert') ? 'block' : 'none';
+            document.getElementById('b-ulti').style.display = (diff === 'expert') ? 'block' : 'none';
         }
 
         function play(action) {
             if(!active) return;
-            // Ton action
-            eHP -= 20; 
-            log("Tu as utilisé : " + action);
+            // Dégâts variables selon la compétence
+            let dmg = (action === 'basic') ? 15 : (action === 'ulti') ? 40 : 20;
+            eHP -= dmg; 
+            log("Tu as utilisé : " + action + " (" + dmg + " dégâts)");
             updateUI();
             
             if(eHP <= 0) endGame("Victoire !");
@@ -95,8 +101,8 @@
             pHP -= 15;
             log("L'IA t'attaque !");
             updateUI();
-            active = true;
             if(pHP <= 0) endGame("Défaite...");
+            else active = true;
         }
 
         function updateUI() {
