@@ -2,29 +2,28 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOL Battle Game - Arène</title>
     <style>
-        body { background: #0e0e10; color: white; font-family: sans-serif; margin: 0; display: flex; justify-content: center; }
+        body { background: #0e0e10; color: white; font-family: sans-serif; display: flex; justify-content: center; margin: 0; }
         .container { width: 90%; max-width: 500px; margin-top: 20px; background: #1f1f23; padding: 20px; border-radius: 12px; }
         .btn-diff { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; }
         .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .character-card { background: #3a3a3c; padding: 10px; border-radius: 6px; cursor: pointer; text-align: center; }
+        .character-card { background: #3a3a3c; padding: 15px; border-radius: 6px; cursor: pointer; text-align: center; }
         .arena { display: flex; justify-content: space-between; margin-bottom: 20px; }
         .health-bar-bg { width: 100%; background: #000; height: 15px; border-radius: 5px; }
         .health-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s; }
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        button { padding: 10px; cursor: pointer; background: #3a3a3c; color: white; border: none; border-radius: 4px; }
-        button:disabled { background: #222; opacity: 0.5; cursor: not-allowed; }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { padding: 12px; cursor: pointer; background: #3a3a3c; color: white; border: none; border-radius: 6px; font-weight: bold; }
+        button:hover { background: #505055; }
     </style>
 </head>
 <body>
 
     <div class="container" id="difficulty-screen">
         <h1>Choisis la Difficulté</h1>
-        <button class="btn-diff" style="background:#2ecc71" onclick="setDifficulty('facile')">Facile</button>
-        <button class="btn-diff" style="background:#3498db" onclick="setDifficulty('normal')">Normal</button>
-        <button class="btn-diff" style="background:#e67e22" onclick="setDifficulty('difficile')">Difficile</button>
+        <button class="btn-diff" style="background:#2ecc71" onclick="init('facile')">Facile (2 Skills)</button>
+        <button class="btn-diff" style="background:#3498db" onclick="init('normal')">Normal (4 Skills)</button>
+        <button class="btn-diff" style="background:#e67e22" onclick="init('difficile')">Difficile (6 Skills)</button>
     </div>
 
     <div class="container" id="selection-screen" style="display: none;">
@@ -34,77 +33,84 @@
 
     <div class="container" id="battle-screen" style="display: none;">
         <div class="arena">
-            <div><h3 id="p-name">Joueur</h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div></div>
-            <div><h3 id="e-name">IA</h3><div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div></div>
+            <div><h3 id="p-name">Joueur</h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><p id="p-hp">150/150</p></div>
+            <div><h3 id="e-name">IA</h3><div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div><p id="e-hp">150/150</p></div>
         </div>
-        <div id="log" style="height: 60px; background:#000; padding:5px; font-size:0.8rem; overflow:hidden;"></div>
+        <div id="log" style="height: 60px; background:#000; padding:10px; font-size:0.9rem; margin-bottom:10px; border-radius:6px;">Le combat commence !</div>
         <div class="action-grid" id="actions">
-            <button onclick="action('basic')" id="b-basic">Attaque</button>
-            <button onclick="action('heal')" id="b-heal">Soin</button>
-            <button onclick="action('brise')" id="b-brise">Brise Armure</button>
-            <button onclick="action('bigHeal')" id="b-bigHeal">Gros Soin</button>
-            <button onclick="action('stun')" id="b-stun">Ban Chat</button>
-            <button onclick="action('toxic')" id="b-toxic">Toxicité</button>
+            <button onclick="play('basic')" id="b-basic">Attaque</button>
+            <button onclick="play('heal')" id="b-heal">Soin</button>
+            <button onclick="play('brise')" id="b-brise">Brise Armure</button>
+            <button onclick="play('bigHeal')" id="b-bigHeal">Gros Soin</button>
+            <button onclick="play('stun')" id="b-stun">Ban Chat</button>
+            <button onclick="play('toxic')" id="b-toxic">Toxicité</button>
         </div>
-        <div id="end-menu" style="display:none; text-align:center; margin-top:10px;">
-            <button onclick="location.reload()" style="background:#9146ff; width:100%;">Rejouer</button>
+        <div id="end-menu" style="display:none; text-align:center; margin-top:20px;">
+            <button onclick="location.reload()" style="background:#9146ff; width:100%;">Rejouer / Menu</button>
         </div>
     </div>
 
     <script>
-        let diff, pHP=150, eHP=150, pMax=150, eMax=150, turn="player", active=true;
-        
-        function setDifficulty(d) {
+        let diff, pHP=150, eHP=150, active=true;
+
+        function init(d) {
             diff = d;
             document.getElementById('difficulty-screen').style.display = 'none';
             document.getElementById('selection-screen').style.display = 'block';
             let r = document.getElementById('roster');
             ["Laura", "Tony", "Rozuya", "Omass"].forEach(n => {
-                let div = document.createElement('div');
-                div.className = 'character-card'; div.innerText = n;
-                div.onclick = () => startGame(n);
-                r.appendChild(div);
+                let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
+                d.onclick = () => start(n); r.appendChild(d);
             });
         }
 
-        function startGame(name) {
+        function start(name) {
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('battle-screen').style.display = 'block';
             document.getElementById('p-name').innerText = name;
             
-            // Affichage compétences selon diff
-            document.getElementById('b-brise').style.display = diff==='facile' ? 'none' : 'block';
-            document.getElementById('b-bigHeal').style.display = diff==='facile' ? 'none' : 'block';
-            document.getElementById('b-stun').style.display = diff!=='difficile' ? 'none' : 'block';
-            document.getElementById('b-toxic').style.display = diff!=='difficile' ? 'none' : 'block';
+            // Logique de visibilité des compétences (LE COEUR DU PROBLÈME)
+            document.getElementById('b-brise').style.display = (diff === 'normal' || diff === 'difficile') ? 'block' : 'none';
+            document.getElementById('b-bigHeal').style.display = (diff === 'normal' || diff === 'difficile') ? 'block' : 'none';
+            document.getElementById('b-stun').style.display = (diff === 'difficile') ? 'block' : 'none';
+            document.getElementById('b-toxic').style.display = (diff === 'difficile') ? 'block' : 'none';
         }
 
-        function action(type) {
-            if(turn !== "player" || !active) return;
-            // Logique simplifiée pour l'exemple (remplace par ta vraie logique de dégâts)
+        function play(action) {
+            if(!active) return;
+            // Ton action
             eHP -= 20; 
+            log("Tu as utilisé : " + action);
             updateUI();
+            
             if(eHP <= 0) endGame("Victoire !");
-            else { turn = "ia"; setTimeout(iaTurn, 1000); }
+            else {
+                active = false;
+                setTimeout(iaTurn, 1000);
+            }
         }
 
         function iaTurn() {
-            if(!active) return;
-            // IA simple
+            if(eHP <= 0) return;
             pHP -= 15;
+            log("L'IA t'attaque !");
             updateUI();
+            active = true;
             if(pHP <= 0) endGame("Défaite...");
-            else turn = "player";
         }
 
         function updateUI() {
-            document.getElementById('p-bar').style.width = (pHP/pMax*100) + "%";
-            document.getElementById('e-bar').style.width = (eHP/eMax*100) + "%";
+            document.getElementById('p-hp').innerText = pHP + "/150";
+            document.getElementById('e-hp').innerText = eHP + "/150";
+            document.getElementById('p-bar').style.width = (pHP/150*100) + "%";
+            document.getElementById('e-bar').style.width = (eHP/150*100) + "%";
         }
+
+        function log(msg) { document.getElementById('log').innerText = msg; }
 
         function endGame(msg) {
             active = false;
-            document.getElementById('log').innerText = msg;
+            log(msg);
             document.getElementById('actions').style.display = 'none';
             document.getElementById('end-menu').style.display = 'block';
         }
