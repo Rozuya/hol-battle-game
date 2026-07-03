@@ -6,26 +6,18 @@
     <style>
         body { background: #0e0e10; color: white; font-family: sans-serif; margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         .container { width: 90%; max-width: 500px; background: #1f1f23; padding: 20px; border-radius: 12px; }
-        
         .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .character-card { background: #3a3a3c; padding: 15px; border-radius: 6px; cursor: pointer; text-align: center; }
         .character-card:hover { background: #9146ff; }
-        
         .arena { display: flex; justify-content: space-between; margin-bottom: 20px; text-align: center; }
         .health-bar-bg { width: 100%; background: #000; height: 15px; border-radius: 5px; }
         .health-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s; }
-        
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         button.skill { padding: 10px; cursor: pointer; background: #3a3a3c; color: white; border: none; border-radius: 6px; display: flex; flex-direction: column; align-items: center; }
-        button.skill strong { font-size: 1rem; }
-        button.skill small { font-size: 0.75rem; color: #aaa; margin-top: 2px; }
-        button.skill:disabled { background: #222; opacity: 0.5; cursor: not-allowed; color: #666; }
-        
-        #log { height: 80px; background: #000; padding: 10px; margin-bottom: 15px; border-radius: 6px; overflow-y: auto; font-size: 0.85rem; border: 1px solid #333; }
-
+        button.skill:disabled { background: #222; opacity: 0.5; cursor: not-allowed; }
+        #log { height: 80px; background: #000; padding: 10px; margin-bottom: 15px; border-radius: 6px; overflow-y: auto; font-size: 0.85rem; }
         #end-screen { text-align: center; display: none; }
-        #end-title { font-size: 2rem; margin-bottom: 20px; }
-        .btn-replay { background: #9146ff; border: none; padding: 15px 30px; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; }
+        .btn-game { display: block; width: 100%; margin-top: 10px; padding: 15px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -42,92 +34,100 @@
         </div>
         <div id="log"></div>
         <div class="action-grid" id="actions">
-            <button class="skill" id="s-basic" onclick="play('basic')"><strong>Attaque</strong><small>15 Dmg (0 CD)</small></button>
-            <button class="skill" id="s-heal" onclick="play('heal')"><strong>Soin</strong><small>+20 PV (2 CD)</small></button>
-            <button class="skill" id="s-brise" onclick="play('brise')"><strong>Brise Armure</strong><small>25 Dmg (2 CD)</small></button>
-            <button class="skill" id="s-bigHeal" onclick="play('bigHeal')"><strong>Gros Soin</strong><small>+50 PV (3 CD)</small></button>
-            <button class="skill" id="s-stun" onclick="play('stun')"><strong>Ban Chat</strong><small>Neutralise (4 CD)</small></button>
-            <button class="skill" id="s-toxic" onclick="play('toxic')"><strong>Toxicité</strong><small>Poison (4 CD)</small></button>
-            <button class="skill" id="s-ulti" onclick="play('ulti')"><strong>ULTI</strong><small>40 Dmg (6 CD)</small></button>
+            <button class="skill" id="s-basic" onclick="play('basic')"><strong>Attaque</strong></button>
+            <button class="skill" id="s-heal" onclick="play('heal')"><strong>Soin</strong></button>
+            <button class="skill" id="s-brise" onclick="play('brise')"><strong>Brise Armure</strong></button>
+            <button class="skill" id="s-bigHeal" onclick="play('bigHeal')"><strong>Gros Soin</strong></button>
+            <button class="skill" id="s-stun" onclick="play('stun')"><strong>Ban Chat</strong></button>
+            <button class="skill" id="s-toxic" onclick="play('toxic')"><strong>Toxicité</strong></button>
+            <button class="skill" id="s-ulti" onclick="play('ulti')"><strong>ULTI</strong></button>
         </div>
     </div>
 
     <div class="container" id="end-screen">
         <h1 id="end-title">Victoire !</h1>
-        <button class="btn-replay" onclick="location.reload()">Rejouer</button>
+        <button class="btn-game" style="background:#9146ff" onclick="location.reload()">Rejouer</button>
+        <button class="btn-game" style="background:#4a4a4c" onclick="location.href='index.html'">Accueil</button>
     </div>
 
     <script>
-        const diff = localStorage.getItem('diff') || 'normal'; 
+        const diff = localStorage.getItem('diff') || 'normal';
         let pHP=150, eHP=150, active=true;
-        const heroes = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
-        
         const skillConfig = {
-            'basic': { desc: '15 Dmg (0 CD)', cdMax: 0, currentCd: 0 },
-            'heal': { desc: '+20 PV (2 CD)', cdMax: 2, currentCd: 0 },
-            'brise': { desc: '25 Dmg (2 CD)', cdMax: 2, currentCd: 0 },
-            'bigHeal': { desc: '+50 PV (3 CD)', cdMax: 3, currentCd: 0 },
-            'stun': { desc: 'Neutralise (4 CD)', cdMax: 4, currentCd: 0 },
-            'toxic': { desc: 'Poison (4 CD)', cdMax: 4, currentCd: 0 },
-            'ulti': { desc: '40 Dmg (6 CD)', cdMax: 6, currentCd: 0 }
+            'basic': { dmg: 15, heal: 0, cd: 0, current: 0 },
+            'heal': { dmg: 0, heal: 20, cd: 2, current: 0 },
+            'brise': { dmg: 25, heal: 0, cd: 2, current: 0 },
+            'bigHeal': { dmg: 0, heal: 50, cd: 3, current: 0 },
+            'stun': { dmg: 10, heal: 0, cd: 4, current: 0 },
+            'toxic': { dmg: 15, heal: 0, cd: 4, current: 0 },
+            'ulti': { dmg: 40, heal: 0, cd: 6, current: 0 }
         };
 
-        const r = document.getElementById('roster');
+        const heroes = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
         heroes.forEach(n => {
             let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
-            d.onclick = () => start(n); r.appendChild(d);
+            d.onclick = () => start(n); document.getElementById('roster').appendChild(d);
         });
 
         function start(name) {
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('battle-screen').style.display = 'block';
             document.getElementById('p-name').innerText = name;
+            document.getElementById('e-name').innerText = "IA " + diff;
             
-            const others = heroes.filter(h => h !== name);
-            document.getElementById('e-name').innerText = others[Math.floor(Math.random() * others.length)];
-            
-            const skills = ['brise', 'bigHeal', 'stun', 'toxic', 'ulti'];
-            skills.forEach(s => { 
-                let btn = document.getElementById('s-' + s);
-                if(btn) btn.style.display = 'none'; 
-            });
-
+            // Masquage skills selon difficulté
+            const list = ['brise','bigHeal','stun','toxic','ulti'];
+            list.forEach(s => { if(document.getElementById('s-'+s)) document.getElementById('s-'+s).style.display = 'none'; });
             if(diff !== 'facile') { document.getElementById('s-brise').style.display = 'flex'; document.getElementById('s-bigHeal').style.display = 'flex'; }
             if(diff === 'difficile' || diff === 'expert') { document.getElementById('s-stun').style.display = 'flex'; document.getElementById('s-toxic').style.display = 'flex'; }
             if(diff === 'expert') { document.getElementById('s-ulti').style.display = 'flex'; }
         }
 
-        function endGame(isWin) {
-            document.getElementById('battle-screen').style.display = 'none';
-            document.getElementById('end-screen').style.display = 'block';
-            const title = document.getElementById('end-title');
-            title.innerText = isWin ? "VICTOIRE !" : "DÉFAITE...";
-            title.style.color = isWin ? "#2ecc71" : "#e74c3c";
-        }
-
         function play(action) {
             if(!active) return;
-            if(action === 'heal') pHP = Math.min(150, pHP + 20);
-            else if(action === 'bigHeal') pHP = Math.min(150, pHP + 50);
-            else eHP = Math.max(0, eHP - (action === 'basic' ? 15 : action === 'ulti' ? 40 : 25));
+            executeMove(action, true);
+            if(eHP > 0) { active = false; setTimeout(iaTurn, 1000); }
+        }
+
+        function executeMove(action, isPlayer) {
+            let s = skillConfig[action];
+            if(isPlayer) { eHP = Math.max(0, eHP - s.dmg); pHP = Math.min(150, pHP + s.heal); }
+            else { pHP = Math.max(0, pHP - s.dmg); eHP = Math.min(150, eHP + s.heal); }
             
-            skillConfig[action].currentCd = skillConfig[action].cdMax;
-            active = false;
+            s.current = s.cd;
             updateUI();
-            
-            if(eHP <= 0) endGame(true);
-            else setTimeout(iaTurn, 1000);
+            if(pHP <= 0 || eHP <= 0) endGame(eHP <= 0);
         }
 
         function iaTurn() {
-            if(eHP > 0) {
-                pHP = Math.max(0, pHP - 15);
-                for(let k in skillConfig) if(skillConfig[k].currentCd > 0) skillConfig[k].currentCd--;
-                updateUI();
-                
-                if(pHP <= 0) endGame(false);
-                else active = true;
+            let move = "basic";
+            let validMoves = Object.keys(skillConfig).filter(k => 
+                skillConfig[k].current === 0 && 
+                (document.getElementById('s-'+k) && document.getElementById('s-'+k).style.display !== 'none' || k === 'basic' || k === 'heal')
+            );
+
+            // LOGIQUE INTELLIGENTE
+            if(diff === 'facile') {
+                move = validMoves[Math.floor(Math.random() * validMoves.length)];
+            } 
+            else if(diff === 'normal') {
+                if(eHP < 60 && validMoves.includes('heal')) move = 'heal';
+                else move = validMoves[Math.floor(Math.random() * validMoves.length)];
             }
+            else { // Difficile et Expert
+                if(eHP < 40 && validMoves.includes('bigHeal')) move = 'bigHeal';
+                else if(eHP < 70 && validMoves.includes('heal')) move = 'heal';
+                else if(pHP < 40 && validMoves.includes('ulti')) move = 'ulti';
+                else if(validMoves.includes('stun')) move = 'stun';
+                else if(validMoves.includes('brise')) move = 'brise';
+                else move = 'basic';
+            }
+
+            executeMove(move, false);
+            
+            // Décrémenter CD
+            for(let k in skillConfig) if(skillConfig[k].current > 0) skillConfig[k].current--;
+            active = true;
         }
 
         function updateUI() {
@@ -138,17 +138,14 @@
             
             for(let k in skillConfig) {
                 let btn = document.getElementById('s-' + k);
-                if(btn) {
-                    let small = btn.querySelector('small');
-                    if (skillConfig[k].currentCd > 0) {
-                        btn.disabled = true;
-                        small.innerText = "Recharge: " + skillConfig[k].currentCd;
-                    } else {
-                        btn.disabled = false;
-                        small.innerText = skillConfig[k].desc;
-                    }
-                }
+                if(btn) btn.disabled = (skillConfig[k].current > 0);
             }
+        }
+
+        function endGame(isWin) {
+            document.getElementById('battle-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+            document.getElementById('end-title').innerText = isWin ? "VICTOIRE !" : "DÉFAITE...";
         }
     </script>
 </body>
