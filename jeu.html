@@ -6,6 +6,8 @@
     <title>House of Laura - L'Arène</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Styles pour les écrans de sélection */
+        .container { max-width: 600px; margin: 50px auto; background: #1f1f23; padding: 20px; border-radius: 12px; border: 1px solid #303032; }
         .diff-grid { display: block; margin-top: 20px; }
         .btn-diff { display: block; width: 100%; padding: 15px; margin: 12px 0; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; color: white; transition: transform 0.1s; }
         .btn-diff:hover { transform: scale(1.02); }
@@ -13,10 +15,9 @@
         .diff-normal { background: #3498db; }
         .diff-difficile { background: #e67e22; }
         .diff-expert { background: #e74c3c; }
-        
         .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
         .character-card { background: #3a3a3c; padding: 15px; border-radius: 6px; cursor: pointer; text-align: center; }
-        .character-card:hover { background: #9146ff; }
+        .character-card:hover { background: #9146ff; color: white; }
     </style>
 </head>
 <body>
@@ -29,7 +30,7 @@
             <button class="btn-diff diff-difficile" onclick="setDifficulty('difficile')">🟠 Difficile</button>
             <button class="btn-diff diff-expert" onclick="setDifficulty('expert')">🔴 Expert</button>
         </div>
-        <button style="background: #333; width:100%; padding:12px; margin-top:10px; border-radius:6px; border:none; color:white; font-weight:bold; cursor:pointer;" onclick="window.location.href='index.html'">Retour au Menu</button>
+        <button style="background: #333; width:100%; padding:12px; margin-top:10px; border-radius:6px; border:none; color:white; cursor:pointer;" onclick="window.location.href='index.html'">Retour au Menu</button>
     </div>
 
     <div class="container" id="selection-screen" style="display: none;">
@@ -39,49 +40,89 @@
     </div>
 
     <div class="container" id="battle-screen" style="display: none;">
+        <h2 id="battle-title">Combat</h2>
+        <div class="arena">
+            <div class="fighter" id="player-box">
+                <h3 id="player-name">Joueur</h3>
+                <div class="health-bar-bg"><div class="health-fill" id="player-hp-bar"></div></div>
+                <p id="player-hp-text">100/100</p>
+                <div id="player-status"></div>
+            </div>
+            <div class="fighter" id="enemy-box">
+                <h3 id="enemy-name">IA</h3>
+                <div class="health-bar-bg"><div class="health-fill" id="enemy-hp-bar"></div></div>
+                <p id="enemy-hp-text">100/100</p>
+                <div id="enemy-status"></div>
+            </div>
         </div>
+        <div id="combat-log" style="height: 100px; overflow-y: auto; background: #0e0e10; padding: 10px; margin: 10px 0;"></div>
+        <div id="action-buttons">
+            <button onclick="executeAction('basic')" id="btn-basic">Attaque</button>
+            <button onclick="executeAction('smallHeal')" id="btn-smallHeal">Soin</button>
+            <button onclick="executeAction('briseDef')" id="btn-briseDef">Brise-Armure</button>
+            <button onclick="executeAction('bigHeal')" id="btn-bigHeal">Gros Soin</button>
+            <button onclick="executeAction('stun')" id="btn-stun">Ban Chat</button>
+            <button onclick="executeAction('antiHeal')" id="btn-antiHeal">Toxicité</button>
+        </div>
+        <button id="restart-btn" style="display:none; background: var(--twitch-purple);" onclick="location.reload()">Rejouer</button>
+    </div>
 
     <script>
         let currentDifficulty = 'normal';
+        let player, enemy, gameActive = true;
         const characters = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
 
-        // ÉTAPE 1 : Stocker la difficulté et passer à l'étape 2
+        class Fighter {
+            constructor(name, maxHp) { this.name = name; this.maxHp = maxHp; this.hp = maxHp; this.defDebuffTurns = 0; this.stunTurns = 0; this.antiHealTurns = 0; this.cooldowns = { briseDef:0, stun:0, antiHeal:0, bigHeal:0 }; }
+        }
+
         function setDifficulty(diff) {
             currentDifficulty = diff;
             document.getElementById('difficulty-screen').style.display = 'none';
             document.getElementById('selection-screen').style.display = 'block';
-            document.getElementById('diff-title').innerText = "Choisis ton combattant (" + diff.toUpperCase() + ")";
             renderRoster();
         }
 
-        // Retour en arrière
         function backToDifficulty() {
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('difficulty-screen').style.display = 'block';
         }
 
-        // Générer les personnages dynamiquement
         function renderRoster() {
             const rosterDiv = document.getElementById('roster');
-            rosterDiv.innerHTML = ''; 
+            rosterDiv.innerHTML = '';
             characters.forEach(char => {
                 let div = document.createElement('div');
                 div.className = 'character-card';
                 div.innerText = char;
-                div.onclick = () => launchBattle(char);
+                div.onclick = () => startGame(char);
                 rosterDiv.appendChild(div);
             });
         }
 
-        // Lancement du combat avec la difficulté mémorisée
-        function launchBattle(selectedChar) {
-            // Ici tu appelles ta fonction de démarrage de combat existante
-            // en utilisant la variable 'currentDifficulty' que tu viens de choisir !
-            console.log("Combat lancé avec : " + selectedChar + " en difficulté : " + currentDifficulty);
-            startGame(selectedChar); // Ta fonction de jeu existante
+        function startGame(selectedChar) {
+            document.getElementById('selection-screen').style.display = 'none';
+            document.getElementById('battle-screen').style.display = 'block';
+            
+            let pHp = currentDifficulty === 'facile' ? 200 : 150;
+            let eHp = currentDifficulty === 'facile' ? 100 : (currentDifficulty === 'expert' ? 250 : 150);
+            
+            player = new Fighter(selectedChar, pHp);
+            enemy = new Fighter("IA Ennemie", eHp);
+            
+            // Gestion visibilité boutons
+            if(currentDifficulty === 'facile') {
+                document.getElementById('btn-briseDef').style.display = 'none';
+                document.getElementById('btn-bigHeal').style.display = 'none';
+                document.getElementById('btn-stun').style.display = 'none';
+                document.getElementById('btn-antiHeal').style.display = 'none';
+            }
+            // ... (Ajoute ta logique de combat complète ici)
+            log("Le combat commence !");
         }
-        
-        // ... (Reste de ton code de combat JS ici) ...
+
+        function log(msg) { document.getElementById('combat-log').innerHTML += `<div>${msg}</div>`; }
+        function executeAction(action) { /* Ton code d'action ici */ }
     </script>
 </body>
 </html>
