@@ -2,29 +2,24 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choix de la Difficulté</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Choix Difficulté</title>
+    <style>
+        body { background: #0e0e10; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #1f1f23; padding: 30px; border-radius: 12px; width: 300px; text-align: center; }
+        button { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; }
+    </style>
 </head>
 <body>
-
     <div class="container">
-        <h1>Choix de la Difficulté</h1>
-        <p>Ajustez le niveau de l'IA avant de combattre.</p>
-        
-        <button onclick="setDifficulty('facile')">🟢 Facile</button>
-        <button onclick="setDifficulty('normal')">🟡 Normal</button>
-        <button onclick="setDifficulty('difficile')">🟠 Difficile</button>
-        <button style="border-color: red; color: red;" onclick="setDifficulty('expert')">🔴 Expert (Hardcore)</button>
-        
-        <br><br>
-        <button style="background: #333;" onclick="window.location.href='index.html'">Retour</button>
+        <h1>Difficulté</h1>
+        <button style="background:#2ecc71" onclick="select('facile')">Facile</button>
+        <button style="background:#3498db" onclick="select('normal')">Normal</button>
+        <button style="background:#e67e22" onclick="select('difficile')">Difficile</button>
+        <button style="background:#e74c3c" onclick="select('expert')">Expert</button>
     </div>
-
     <script>
-        function setDifficulty(level) {
-            // Sauvegarde le choix pour l'utiliser dans jeu.html
-            localStorage.setItem('hol_difficulte', level);
+        function select(d) {
+            localStorage.setItem('diff', d);
             window.location.href = 'jeu.html';
         }
     </script>
