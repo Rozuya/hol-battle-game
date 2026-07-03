@@ -2,21 +2,50 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House of Laura - Le Jeu</title>
     <link rel="stylesheet" href="style.css">
-    <title>house-of-laura-tcg - Accueil</title>
 </head>
 <body>
+
     <div class="container">
-        <h1>HOUSE-OF-LAURA-TCG</h1>
-        <a href="difficulte.html" class="btn">LANCER L'ARÈNE</a>
-        <a href="#" class="btn">RÈGLES</a>
-        <section class="actus">
-            <h2>Dernières Actus</h2>
-            <ul>
-                <li>🚀 Mise à jour 1.2 : Nouveaux héros !</li>
-                <li>🎮 Le mode local arrive bientôt...</li>
-            </ul>
-        </section>
+        <h1>House of Laura<br>Battle Arena</h1>
+        
+        <button onclick="window.location.href='difficulte.html'">🎮 Lancer le jeu</button><br>
+        <button onclick="openModal('modal-regles')">📜 Règles</button><br>
+        <button onclick="openModal('modal-actus')">📰 Actus</button>
     </div>
+
+    <!-- Modale Règles -->
+    <div class="overlay" id="overlay" onclick="closeModals()"></div>
+    
+    <div class="modal" id="modal-regles">
+        <h2>Les Règles du jeu</h2>
+        <p>1. Choisissez votre membre de la team <strong>House of Laura</strong>.</p>
+        <p>2. Affrontez une IA redoutable dans un combat au tour par tour.</p>
+        <p>3. Gérez vos points de vie : attaquez ou soignez-vous stratégiquement !</p>
+        <p><em>En mode Expert, l'IA est sans pitié. Bonne chance !</em></p>
+        <button onclick="closeModals()">Fermer</button>
+    </div>
+
+    <!-- Modale Actus -->
+    <div class="modal" id="modal-actus">
+        <h2>Dernières Actus</h2>
+        <p>🔹 Bienvenue sur la v1.0 du jeu House of Laura !</p>
+        <p>🔹 N'oublie pas de follow la chaîne sur Twitch.</p>
+        <p>🔹 Bientôt : de nouveaux personnages et attaques spéciales !</p>
+        <button onclick="closeModals()">Fermer</button>
+    </div>
+
+    <script>
+        function openModal(id) {
+            document.getElementById(id).style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+        function closeModals() {
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+            document.getElementById('overlay').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
