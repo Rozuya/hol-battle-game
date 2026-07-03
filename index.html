@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>HOL Battle Game</title>
+    <title>HOL Battle Game - Menu</title>
     <style>
         :root { --twitch-purple: #9146ff; --bg-dark: #0e0e10; --card-bg: #1f1f23; --text-color: #efeff1; }
         body { background-color: var(--bg-dark); color: var(--text-color); font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
@@ -10,19 +10,28 @@
         h1 { color: var(--twitch-purple); margin-bottom: 30px; text-transform: uppercase; }
         .menu-btn { background: var(--twitch-purple); color: white; border: none; padding: 15px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         .menu-btn.secondary { background: #3a3a3c; }
+        
+        /* Modal Styles */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); }
-        .modal-content { background: #18181c; margin: 5% auto; padding: 25px; border: 2px solid var(--twitch-purple); border-radius: 12px; width: 85%; max-width: 550px; text-align: left; }
+        .modal-content { background: #18181c; margin: 5% auto; padding: 25px; border: 2px solid var(--twitch-purple); border-radius: 12px; width: 85%; max-width: 550px; text-align: left; position: relative; }
+        
+        /* Bouton de fermeture */
+        .close-btn { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
+        .close-btn:hover { color: var(--twitch-purple); }
     </style>
 </head>
 <body>
+
     <div class="menu-container">
         <h1>HOL Battle Game</h1>
         <button class="menu-btn" onclick="window.location.href='difficulte.html'">🎮 Jouer</button>
         <button class="menu-btn secondary" onclick="document.getElementById('rules-modal').style.display='block'">📜 Règles & Actus</button>
     </div>
 
+    <!-- Modale avec croix de fermeture -->
     <div id="rules-modal" class="modal" onclick="this.style.display='none'">
         <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-btn" onclick="document.getElementById('rules-modal').style.display='none'">&times;</span>
             <h2>📜 Règles & Actualités</h2>
             <p><strong>Comment jouer :</strong> Choisis ta difficulté, ton héros, et affronte l'ennemi.</p>
             <ul>
