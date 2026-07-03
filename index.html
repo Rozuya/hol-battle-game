@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>HOL Battle Game - Menu</title>
+    <title>HOL Battle Game</title>
     <style>
         :root { --twitch-purple: #9146ff; --bg-dark: #0e0e10; --card-bg: #1f1f23; --text-color: #efeff1; }
         body { background-color: var(--bg-dark); color: var(--text-color); font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
@@ -15,25 +15,19 @@
     </style>
 </head>
 <body>
-
     <div class="menu-container">
         <h1>HOL Battle Game</h1>
-        <button class="menu-btn" onclick="window.location.href='jeu.html'">🎮 Jouer</button>
+        <button class="menu-btn" onclick="window.location.href='difficulte.html'">🎮 Jouer</button>
         <button class="menu-btn secondary" onclick="document.getElementById('rules-modal').style.display='block'">📜 Règles & Actus</button>
     </div>
 
     <div id="rules-modal" class="modal" onclick="this.style.display='none'">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2>📜 Règles & Actualités</h2>
-            <p><strong>Comment jouer :</strong> Choisi ta difficulté, puis ton combattant.</p>
+            <p><strong>Comment jouer :</strong> Choisis ta difficulté, ton héros, et affronte l'ennemi.</p>
             <ul>
-                <li><strong>Système de Cooldown :</strong> Tes compétences ont un temps de recharge. Ne spammez pas, gérez vos tours !</li>
-                <li>Facile : 2 compétences | Normal : 4 | Difficile : 6 | Expert : 7 (tout débloqué).</li>
-            </ul>
-            <h3>Actualités :</h3>
-            <ul>
-                <li>Mise à jour : Système de cooldown ajouté pour plus de stratégie.</li>
-                <li>Mode Expert désormais disponible.</li>
+                <li><strong>Système de Cooldown :</strong> Tes compétences ont un temps de recharge. Ne spammez pas !</li>
+                <li>Facile : 2 comp | Normal : 4 | Difficile : 6 | Expert : 7.</li>
             </ul>
         </div>
     </div>
