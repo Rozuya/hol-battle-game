@@ -4,39 +4,54 @@
     <meta charset="UTF-8">
     <title>House of Laura | Arena</title>
     <style>
-        :root { --leg: #f59e0b; --epi: #a855f7; --rare: #3b82f6; --com: #22c55e; }
-        body { margin: 0; background: #060608; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .arena { width: 95%; max-width: 900px; text-align: center; }
-        .team { display: flex; justify-content: center; gap: 20px; margin: 30px 0; }
+        :root { --leg: #f59e0b; --epi: #a855f7; --rare: #3b82f6; --com: #22c55e; --bg: #060608; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Style Carte "Snap" */
-        .card { width: 130px; height: 180px; background: #1c1c1f; border-radius: 12px; border: 4px solid #333; cursor: pointer; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .card:hover { transform: scale(1.05); }
+        /* Plateau de jeu */
+        #game-board { display: flex; flex-direction: column; justify-content: space-between; height: 100vh; padding: 20px; box-sizing: border-box; }
+        
+        /* Zones des joueurs */
+        .zone { display: flex; justify-content: center; gap: 20px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 15px; }
+        #opponent-zone { border-bottom: 2px solid #333; }
+        #player-zone { border-top: 2px solid #333; }
+
+        /* Style Carte "TCG" */
+        .card { width: 140px; height: 190px; background: #121212; border: 4px solid #333; border-radius: 12px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .card:hover { transform: translateY(-10px); }
         .card.selected { border-color: #9146ff; box-shadow: 0 0 20px #9146ff; }
         .card.target { border-color: #ef4444; box-shadow: 0 0 20px #ef4444; }
         .card.legendary { border-color: var(--leg); }
         .card.epic { border-color: var(--epi); }
         .card.rare { border-color: var(--rare); }
         .card.common { border-color: var(--com); }
-        
-        .hp-badge { position: absolute; bottom: 10px; background: #000; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
-        .btn { padding: 12px 25px; background: #9146ff; border: none; color: white; border-radius: 8px; cursor: pointer; margin: 5px; font-weight: bold; text-transform: uppercase; }
+
+        /* Interface d'actions */
+        #ui-layer { position: absolute; top: 50%; left: 0; width: 100%; text-align: center; pointer-events: none; }
+        .action-btns { pointer-events: auto; }
+        .btn { padding: 12px 25px; background: #18181b; border: 1px solid #444; color: white; cursor: pointer; margin: 5px; border-radius: 6px; font-weight: bold; }
+        .btn:hover { background: #9146ff; border-color: #9146ff; }
     </style>
 </head>
 <body>
-    <div class="arena">
-        <div id="setup">
-            <h1>SÉLECTIONNE LA DIFFICULTÉ</h1>
-            <button class="btn" onclick="init('facile')">FACILE</button>
-            <button class="btn" onclick="init('difficile')">DIFFICILE</button>
+
+    <!-- Écran de démarrage -->
+    <div id="setup" style="text-align:center; margin-top:20%;">
+        <h1>CHOISIR DIFFICULTÉ</h1>
+        <button class="btn" onclick="init('facile')">FACILE</button>
+        <button class="btn" onclick="init('difficile')">DIFFICILE</button>
+    </div>
+
+    <!-- Plateau de jeu -->
+    <div id="game-board" style="display:none;">
+        <div id="opponent-zone" class="zone"></div>
+        
+        <!-- Zone d'action centrale (comme dans image_3c7602.jpg) -->
+        <div id="ui-layer">
+            <h2 id="status">Sélectionne ton héros</h2>
+            <div id="actions" class="action-btns"></div>
         </div>
 
-        <div id="game" style="display:none;">
-            <h2 id="status">Sélectionne un héros</h2>
-            <div id="e-team" class="team"></div>
-            <div id="p-team" class="team"></div>
-            <div id="actions"></div>
-        </div>
+        <div id="player-zone" class="zone"></div>
     </div>
 
     <script>
@@ -57,37 +72,45 @@
             state.pTeam = deck.slice(0, 3).map(c => ({...c, hp: 100}));
             state.eTeam = deck.slice(3, 6).map(c => ({...c, hp: 100}));
             document.getElementById('setup').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
+            document.getElementById('game-board').style.display = 'flex';
             render();
         }
 
         function render() {
-            document.getElementById('p-team').innerHTML = state.pTeam.map((c, i) => 
-                `<div class="card ${c.r} ${state.selected === i ? 'selected' : ''}" onclick="select(${i})">
-                    <strong>${c.n}</strong><div class="hp-badge">${c.hp} HP</div>
-                </div>`).join('');
-            document.getElementById('e-team').innerHTML = state.eTeam.map((c, i) => 
+            // Rendu Zone Opponent (Haut)
+            document.getElementById('opponent-zone').innerHTML = state.eTeam.map((c, i) => 
                 `<div class="card ${c.r} ${state.skill ? 'target' : ''}" onclick="attack(${i})">
-                    <strong>${c.n}</strong><div class="hp-badge">${c.hp} HP</div>
+                    <strong>${c.n}</strong><div style="font-size:1.2rem; margin-top:10px;">${c.hp} HP</div>
+                </div>`).join('');
+
+            // Rendu Zone Player (Bas)
+            document.getElementById('player-zone').innerHTML = state.pTeam.map((c, i) => 
+                `<div class="card ${c.r} ${state.selected === i ? 'selected' : ''}" onclick="select(${i})">
+                    <strong>${c.n}</strong><div style="font-size:1.2rem; margin-top:10px;">${c.hp} HP</div>
                 </div>`).join('');
         }
 
         function select(i) {
             state.selected = i;
+            document.getElementById('status').innerText = "Choisis ton attaque";
             document.getElementById('actions').innerHTML = state.pTeam[i].s.map(sk => 
-                `<button class="btn" onclick="setSkill('${sk.n}', ${sk.d})">${sk.n}</button>`).join('');
+                `<button class="btn" onclick="setSkill('${sk.n}', ${sk.d})">${sk.n} (${sk.d > 0 ? '-' : '+'}${Math.abs(sk.d)})</button>`).join('');
             render();
         }
 
-        function setSkill(n, d) { state.skill = {n, d}; document.getElementById('status').innerText = "Cible un ennemi !"; }
+        function setSkill(name, dmg) { 
+            state.skill = {name, dmg}; 
+            document.getElementById('status').innerText = "Cible un ennemi !"; 
+            document.getElementById('actions').innerHTML = ""; // Cache les boutons après clic
+        }
 
         function attack(i) {
             if(!state.skill) return;
-            state.eTeam[i].hp = Math.max(0, state.eTeam[i].hp - state.skill.d);
+            state.eTeam[i].hp = Math.max(0, state.eTeam[i].hp - state.skill.dmg);
             state.selected = null; state.skill = null;
-            document.getElementById('actions').innerHTML = "";
+            document.getElementById('status').innerText = "Attaque lancée !";
             render();
-            setTimeout(aiMove, 800);
+            setTimeout(aiMove, 1000);
         }
 
         function aiMove() {
