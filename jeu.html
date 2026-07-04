@@ -2,47 +2,28 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOL Battle Arena</title>
-    <style>
-        body { background: #121212; color: white; display: flex; justify-content: center; min-height: 100vh; margin: 0; font-family: sans-serif; padding: 10px; }
-        .container { width: 100%; max-width: 500px; text-align: center; }
-        .btn { display: block; width: 100%; padding: 20px; margin: 10px 0; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 18px; }
-        .btn:hover { background: #333; }
-        .skill { padding: 15px; background: #222; border: 1px solid #9146ff; color: white; margin: 5px; width: 45%; cursor: pointer; }
-        .skill:disabled { opacity: 0.3; cursor: not-allowed; }
-        #log { margin: 20px 0; padding: 15px; background: #000; border: 1px solid #9146ff; font-weight: bold; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <title>HOL Battle Arena - Jeu</title>
 </head>
 <body>
 
-    <!-- Écran 1 : Difficulté -->
-    <div class="container" id="screen-diff">
-        <h1>Choix de la difficulté</h1>
-        <button class="btn" onclick="selectDiff(2)">Facile (2)</button>
-        <button class="btn" onclick="selectDiff(4)">Normal (4)</button>
-        <button class="btn" onclick="selectDiff(6)">Difficile (6)</button>
-        <button class="btn" onclick="selectDiff(7)">Expert (7)</button>
-    </div>
-
-    <!-- Écran 2 : Héros -->
-    <div class="container" id="screen-hero" style="display: none;">
+    <div class="container" id="hero-menu">
         <h1>Choisis ton héros</h1>
         <div id="roster"></div>
     </div>
 
-    <!-- Écran 3 : Combat -->
-    <div class="container" id="screen-battle" style="display: none;">
+    <div class="container" id="battle" style="display: none;">
         <h2 id="fight-info"></h2>
         <div id="log">Combat !</div>
         <div id="actions"></div>
     </div>
 
-    <div id="modal" class="modal"><div style="background:#1a1a1a; padding:30px; border:2px solid #9146ff;">
-        <h2 id="modal-title"></h2>
-        <button class="btn" onclick="location.reload()">Rejouer</button>
-    </div></div>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <button class="btn" onclick="location.href='difficult.html'">Retour Menu</button>
+        </div>
+    </div>
 
     <script>
         const charData = {
@@ -54,19 +35,16 @@
             "Dark MortelCygne": { hp: 220, skills: [{n:'Plume',d:40,h:0},{n:'Saignée',d:60,h:10},{n:'Griffes',d:60,h:0},{n:'Festin',d:30,h:30},{n:'Étreinte',d:90,h:20},{n:'Ombre',d:50,h:0},{n:'Noir',d:110,h:0}] }
         };
 
-        let count, pName, eName, pHP, eHP, pMax, eMax, pS, eS, isPlayerTurn = true;
+        // Récupère la difficulté stockée par difficult.html
+        let count = parseInt(localStorage.getItem('skillCount')) || 4;
+        let pName, eName, pHP, eHP, pMax, eMax, pS, eS, isPlayerTurn = true;
 
-        function selectDiff(c) {
-            count = c;
-            document.getElementById('screen-diff').style.display = 'none';
-            document.getElementById('screen-hero').style.display = 'block';
-            Object.keys(charData).forEach(name => {
-                let b = document.createElement('button');
-                b.className = 'btn'; b.innerText = name;
-                b.onclick = () => start(name);
-                document.getElementById('roster').appendChild(b);
-            });
-        }
+        Object.keys(charData).forEach(name => {
+            let b = document.createElement('button');
+            b.className = 'btn'; b.innerText = name;
+            b.onclick = () => start(name);
+            document.getElementById('roster').appendChild(b);
+        });
 
         function start(name) {
             pName = name;
@@ -74,8 +52,8 @@
             eName = ops[Math.floor(Math.random() * ops.length)];
             pMax = pHP = charData[pName].hp; eMax = eHP = charData[eName].hp;
             pS = charData[pName].skills.slice(0, count); eS = charData[eName].skills.slice(0, count);
-            document.getElementById('screen-hero').style.display = 'none';
-            document.getElementById('screen-battle').style.display = 'block';
+            document.getElementById('hero-menu').style.display = 'none';
+            document.getElementById('battle').style.display = 'block';
             updateUI();
         }
 
