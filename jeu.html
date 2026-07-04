@@ -121,7 +121,6 @@
             let hero = charData[n];
             let d = document.createElement('button');
             d.className = 'character-card';
-            // Correctif visuel : Nom en blanc (lisible), Rôle en violet
             d.innerHTML = `<div style="color: white; font-weight: bold; font-size: 1.1rem;">${n}</div><div style="font-size: 0.8rem; color: #9146ff; margin-top: 5px;">${hero.role}</div>`;
             d.onclick = () => start(n);
             document.getElementById('roster').appendChild(d);
@@ -152,6 +151,7 @@
                 pSkills[k] = {...s, cdCurrent: 0};
                 let btn = document.getElementById('s-'+k);
                 if(btn) {
+                    // On définit le texte initial
                     btn.innerHTML = `<strong>${s.name}</strong><br><small>${s.heal>0 ? '+'+s.heal+' PV' : s.dmg+' Dmg'} (${s.cd} CD)</small>`;
                     if(!isSkillAllowed(k)) btn.style.display = 'none';
                 }
@@ -199,11 +199,20 @@
             document.getElementById('e-hp').innerText = eHP + "/" + eMaxHP;
             document.getElementById('p-bar').style.width = (pHP/pMaxHP*100) + "%";
             document.getElementById('e-bar').style.width = (eHP/eMaxHP*100) + "%";
+            
             for(let k in pSkills) {
                 let btn = document.getElementById('s-'+k);
                 if(btn) {
                     btn.disabled = pSkills[k].cdCurrent > 0;
-                    if(btn.disabled) btn.querySelector('small').innerText = "Recharge: " + pSkills[k].cdCurrent;
+                    let skillData = pSkills[k];
+                    
+                    if(btn.disabled) {
+                        // Affiche le rechargement
+                        btn.querySelector('small').innerText = "Recharge: " + pSkills[k].cdCurrent;
+                    } else {
+                        // Affiche les stats normales (le correctif)
+                        btn.querySelector('small').innerText = `${skillData.heal>0 ? '+'+skillData.heal+' PV' : skillData.dmg+' Dmg'} (${skillData.cd} CD)`;
+                    }
                 }
             }
         }
