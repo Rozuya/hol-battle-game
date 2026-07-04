@@ -1,20 +1,11 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
-    <title>Difficulté</title>
-</head>
-<body>
-    <div class="container">
-        <h1>Choix Difficulté</h1>
-        <button class="btn" onclick="setDiff(2)">Facile (2)</button>
-        <button class="btn" onclick="setDiff(4)">Normal (4)</button>
-        <button class="btn" onclick="setDiff(6)">Difficile (6)</button>
-        <button class="btn" style="border-color:#ff4646" onclick="setDiff(7)">Expert (7)</button>
-    </div>
-    <script>
-        function setDiff(c) { localStorage.setItem('skillCount', c); location.href='jeu.html'; }
-    </script>
-</body>
-</html>
+<div class="container">
+    <h1>Choisir difficulté</h1>
+    <button class="btn" onclick="save(2)">Facile (2 compétences)</button>
+    <button class="btn" onclick="save(4)">Normal (4 compétences)</button>
+    <button class="btn" onclick="save(6)">Difficile (6 compétences)</button>
+    <button class="btn" style="border-color:#ff4646" onclick="save(7)">Expert (7 compétences)</button>
+</div>
+<script>
+    function save(n) { localStorage.setItem('diff', n); location.href='jeu.html'; }
+</script>
+
