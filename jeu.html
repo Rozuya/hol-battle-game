@@ -2,31 +2,9 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Arène HOL - Combat</title>
-    <style>
-        body { background: #0e0e10; color: white; font-family: sans-serif; margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .container { width: 90%; max-width: 500px; background: #1f1f23; padding: 20px; border-radius: 12px; }
-        
-        .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .character-card { background: #3a3a3c; padding: 15px; border-radius: 6px; cursor: pointer; text-align: center; }
-        .character-card:hover { background: #9146ff; }
-        
-        .arena { display: flex; justify-content: space-between; margin-bottom: 20px; text-align: center; }
-        .health-bar-bg { width: 100%; background: #000; height: 15px; border-radius: 5px; }
-        .health-fill { height: 100%; background: #2ecc71; width: 100%; transition: width 0.3s; }
-        
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button.skill { padding: 10px; cursor: pointer; background: #3a3a3c; color: white; border: none; border-radius: 6px; display: flex; flex-direction: column; align-items: center; }
-        button.skill strong { font-size: 1rem; }
-        button.skill small { font-size: 0.75rem; color: #aaa; margin-top: 2px; }
-        button.skill:disabled { background: #222; opacity: 0.5; cursor: not-allowed; color: #666; }
-        
-        #log { height: 80px; background: #000; padding: 10px; margin-bottom: 15px; border-radius: 6px; overflow-y: auto; font-size: 0.85rem; border: 1px solid #333; }
-
-        #end-screen { text-align: center; display: none; }
-        #end-title { font-size: 2rem; margin-bottom: 20px; }
-        .btn-game { display: block; width: 100%; margin-top: 10px; padding: 15px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOL Battle Game - Combat</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -37,8 +15,16 @@
 
     <div class="container" id="battle-screen" style="display: none;">
         <div class="arena">
-            <div><h3 id="p-name">Joueur</h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><p id="p-hp">150/150</p></div>
-            <div><h3 id="e-name">Ennemi</h3><div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div><p id="e-hp">150/150</p></div>
+            <div>
+                <h3 id="p-name">Joueur</h3>
+                <div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div>
+                <p id="p-hp">150/150</p>
+            </div>
+            <div>
+                <h3 id="e-name">Ennemi</h3>
+                <div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div>
+                <p id="e-hp">150/150</p>
+            </div>
         </div>
         <div id="log"></div>
         <div class="action-grid" id="actions">
@@ -54,8 +40,8 @@
 
     <div class="container" id="end-screen">
         <h1 id="end-title">Victoire !</h1>
-        <button class="btn-game" style="background:#9146ff" onclick="location.reload()">Rejouer</button>
-        <button class="btn-game" style="background:#4a4a4c" onclick="location.href='index.html'">Accueil</button>
+        <button class="btn-game btn-play" onclick="location.reload()">Rejouer</button>
+        <button class="btn-game btn-home" onclick="location.href='index.html'">Accueil</button>
     </div>
 
     <script>
@@ -162,7 +148,9 @@
         function endGame(isWin) {
             document.getElementById('battle-screen').style.display = 'none';
             document.getElementById('end-screen').style.display = 'block';
-            document.getElementById('end-title').innerText = isWin ? "VICTOIRE !" : "DÉFAITE...";
+            const title = document.getElementById('end-title');
+            title.innerText = isWin ? "VICTOIRE !" : "DÉFAITE...";
+            title.style.color = isWin ? "#2ecc71" : "#e74c3c";
         }
     </script>
 </body>
