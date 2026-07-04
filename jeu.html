@@ -10,7 +10,7 @@
 
     <div class="container" id="selection-screen">
         <h1>Choisis ton héros</h1>
-        <div class="roster" id="roster" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;"></div>
+        <div class="roster" id="roster"></div>
     </div>
 
     <div class="container" id="battle-screen" style="display: none;">
@@ -110,7 +110,7 @@
             let hero = charData[n];
             let d = document.createElement('button');
             d.className = 'character-card';
-            d.innerHTML = `<div style="font-weight: bold; font-size: 1rem;">${n}</div><div style="font-size: 0.75rem; color: #b3b3b3;">${hero.role}</div>`;
+            d.innerHTML = `${n}<br><span style="font-size: 0.7rem; opacity: 0.8;">${hero.role}</span>`;
             d.onclick = () => start(n);
             document.getElementById('roster').appendChild(d);
         });
