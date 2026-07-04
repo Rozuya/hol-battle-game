@@ -1,1 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choix du Héros</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+    <div class="container">
+        <h1>Choisis ton Héros</h1>
+        <div id="roster" class="roster"></div>
+    </div>
+
+    <script>
+        // Les 6 personnages avec leur rôle
+        const chars = {
+            "House of Laura": { type: "Support", hp: 260 },
+            "HOL Rozuya": { type: "DPS", hp: 230 },
+            "HOL Tony": { type: "Tank", hp: 300 },
+            "HOL Omass": { type: "DPS", hp: 250 },
+            "K974YT": { type: "Assassin", hp: 200 },
+            "Dark MortelCygne": { type: "Tank", hp: 220 }
+        };
+
+        const rosterDiv = document.getElementById('roster');
+
+        Object.keys(chars).forEach(name => {
+            let b = document.createElement('button');
+            b.className = 'btn';
+            // On affiche le nom et le rôle en petit en dessous
+            b.innerHTML = `<strong>${name}</strong><br><small style="color: #9146ff;">${chars[name].type}</small>`;
+            b.onclick = () => { 
+                localStorage.setItem('char', name); 
+                location.href = 'combat.html'; 
+            };
+            rosterDiv.appendChild(b);
+        });
+    </script>
+</body>
+</html>
