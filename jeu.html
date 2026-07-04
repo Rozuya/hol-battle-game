@@ -3,168 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combat HOL</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Combat HOL - Ultimate Version</title>
     <style>
-        /* Modale Pop-up */
-        .modal-overlay {
-            display: none; /* Caché par défaut */
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: #1e1e1e;
-            padding: 30px;
-            border: 2px solid #9146ff;
-            border-radius: 12px;
-            text-align: center;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            width: 80%;
-            max-width: 300px;
-        }
-        .modal-btns {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .btn-modal {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 600px; background: #1a1a1a; padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .health-bar { height: 20px; background: #333; border-radius: 10px; overflow: hidden; margin-top: 5px; border: 1px solid #444; }
+        .bar { height: 100%; background: #9146ff; width: 100%; transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .shaking { animation: shake 0.4s; background: #ff4646 !important; }
+        @keyframes shake { 0%, 100% {transform: translateX(0)} 25% {transform: translateX(-5px)} 75% {transform: translateX(5px)} }
+        
+        .btn { padding: 15px; background: #2a2a2a; border: 1px solid #444; color: white; cursor: pointer; border-radius: 8px; transition: 0.2s; font-size: 0.9rem; }
+        .btn:hover:not(:disabled) { background: #3a3a3a; border-color: #9146ff; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; border: 1px solid #222; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
+        .modal-box { background: #1e1e1e; padding: 30px; border-radius: 15px; border: 2px solid #9146ff; text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- Fenêtre Pop-up de fin -->
-    <div id="endModal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 id="modal-title">Victoire !</h2>
-            <div class="modal-btns">
-                <button class="btn-modal" onclick="location.reload()" style="background: #46ff55;">Rejouer</button>
-                <button class="btn-modal" onclick="window.location.href='index.html'" style="background: #555;">Accueil</button>
-            </div>
+    <div id="endModal" class="modal">
+        <div class="modal-box">
+            <h1 id="modal-title">VICTOIRE</h1>
+            <button class="btn" onclick="location.reload()">Rejouer</button>
         </div>
     </div>
 
-    <div class="container" style="max-width: 600px;">
+    <div class="container">
         <div style="display: flex; gap: 20px; margin-bottom: 30px;">
             <div style="flex: 1; text-align: center;">
-                <div id="p-name" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;"></div>
+                <div id="p-name" style="font-weight: bold; margin-bottom: 5px;"></div>
                 <div class="health-bar"><div id="p-bar" class="bar"></div></div>
-                <div id="p-hp" style="margin-top: 8px; font-size: 0.95rem; color: #ddd;"></div>
+                <div id="p-hp" style="font-size: 0.8rem; margin-top: 5px;"></div>
             </div>
             <div style="flex: 1; text-align: center;">
-                <div id="e-name" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;"></div>
+                <div id="e-name" style="font-weight: bold; margin-bottom: 5px;"></div>
                 <div class="health-bar"><div id="e-bar" class="bar" style="background: #ff4646;"></div></div>
-                <div id="e-hp" style="margin-top: 8px; font-size: 0.95rem; color: #ddd;"></div>
+                <div id="e-hp" style="font-size: 0.8rem; margin-top: 5px;"></div>
             </div>
         </div>
-
-        <h2 id="log" style="font-size: 1.1rem; margin: 25px 0; text-align: center; color: #9146ff;">À toi de jouer !</h2>
-        <div id="actions" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
+        <h2 id="log" style="text-align: center; font-size: 1rem; color: #9146ff; min-height: 24px;">À toi de jouer !</h2>
+        <div id="actions" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px;"></div>
     </div>
 
     <script>
         const chars = {
-            "House of Laura": {hp: 200, skills:[{n:'Chat Spam',v:20,t:'dmg',cd:0},{n:'BRB',v:25,t:'heal',cd:2},{n:'Host Raid',v:40,t:'dmg',cd:2},{n:'Sub Gift',v:50,t:'heal',cd:3},{n:'Donation',v:60,t:'dmg',cd:2},{n:'Stream Event',v:80,t:'dmg',cd:4},{n:'Partner Prime',v:100,t:'dmg',cd:5}]},
-            "HOL Rozuya": {hp: 150, skills:[{n:'Code',v:15,t:'dmg',cd:0},{n:'Soin',v:30,t:'heal',cd:2},{n:'Debug',v:25,t:'dmg',cd:1},{n:'Backup',v:40,t:'heal',cd:3},{n:'Panic',v:50,t:'dmg',cd:2},{n:'Flash',v:65,t:'dmg',cd:3},{n:'System',v:85,t:'dmg',cd:5}]},
-            "HOL Tony": {hp: 300, skills:[{n:'Bloc',v:10,t:'dmg',cd:0},{n:'Cri',v:15,t:'dmg',cd:1},{n:'Soin',v:30,t:'heal',cd:3},{n:'Rush',v:35,t:'dmg',cd:2},{n:'Charge',v:45,t:'dmg',cd:2},{n:'Impact',v:60,t:'dmg',cd:3},{n:'Mur',v:90,t:'dmg',cd:5}]},
-            "HOL Omass": {hp: 220, skills:[{n:'Rush',v:20,t:'dmg',cd:0},{n:'Kick',v:30,t:'dmg',cd:1},{n:'Punch',v:40,t:'dmg',cd:2},{n:'Slam',v:45,t:'dmg',cd:2},{n:'Combo',v:60,t:'dmg',cd:3},{n:'Uppercut',v:75,t:'dmg',cd:4},{n:'Fury',v:100,t:'dmg',cd:5}]},
-            "K974YT": {hp: 140, skills:[{n:'Jump',v:25,t:'dmg',cd:0},{n:'Dash',v:35,t:'dmg',cd:1},{n:'Silent',v:45,t:'dmg',cd:2},{n:'Cut',v:55,t:'dmg',cd:2},{n:'Slash',v:70,t:'dmg',cd:3},{n:'Blade',v:85,t:'dmg',cd:4},{n:'Backstab',v:110,t:'dmg',cd:5}]},
-            "Dark MortelCygne": {hp: 180, skills:[{n:'Ombre',v:20,t:'dmg',cd:0},{n:'Vampire',v:25,t:'heal',cd:2},{n:'Griffe',v:40,t:'dmg',cd:1},{n:'Night',v:50,t:'dmg',cd:2},{n:'Black',v:65,t:'dmg',cd:3},{n:'Étreinte',v:80,t:'dmg',cd:4},{n:'Soul',v:105,t:'dmg',cd:5}]}
+            "House of Laura": {hp: 200, skills: [{n:'Chat Spam',v:20,t:'dmg',cd:0},{n:'BRB',v:30,t:'heal',cd:2},{n:'Host Raid',v:45,t:'dmg',cd:2},{n:'Sub Gift',v:40,t:'heal',cd:3},{n:'Donation',v:65,t:'dmg',cd:2},{n:'Stream Event',v:90,t:'dmg',cd:4},{n:'Partner Prime',v:120,t:'dmg',cd:5}]},
+            "HOL Rozuya": {hp: 190, skills: [{n:'Code',v:25,t:'dmg',cd:0},{n:'Soin',v:25,t:'heal',cd:1},{n:'Debug',v:35,t:'dmg',cd:1},{n:'Backup',v:50,t:'heal',cd:3},{n:'Panic',v:55,t:'dmg',cd:2},{n:'Flash',v:75,t:'dmg',cd:3},{n:'System',v:110,t:'dmg',cd:5}]},
+            "HOL Tony": {hp: 220, skills: [{n:'Bloc',v:15,t:'dmg',cd:0},{n:'Cri',v:20,t:'dmg',cd:1},{n:'Soin',v:35,t:'heal',cd:3},{n:'Rush',v:40,t:'dmg',cd:2},{n:'Charge',v:50,t:'dmg',cd:3},{n:'Impact',v:70,t:'dmg',cd:4},{n:'Mur',v:110,t:'dmg',cd:6}]},
+            "HOL Omass": {hp: 180, skills: [{n:'Rush',v:22,t:'dmg',cd:0},{n:'Flex',v:20,t:'heal',cd:2},{n:'Punch',v:35,t:'dmg',cd:1},{n:'Slam',v:45,t:'dmg',cd:1},{n:'Combo',v:55,t:'dmg',cd:2},{n:'Uppercut',v:75,t:'dmg',cd:3},{n:'Fury',v:105,t:'dmg',cd:4}]},
+            "K974YT": {hp: 200, skills: [{n:'Jump',v:18,t:'dmg',cd:0},{n:'Dash',v:25,t:'dmg',cd:1},{n:'Silent',v:40,t:'dmg',cd:2},{n:'Cut',v:55,t:'heal',cd:3},{n:'Slash',v:60,t:'dmg',cd:2},{n:'Blade',v:85,t:'dmg',cd:4},{n:'Backstab',v:115,t:'dmg',cd:5}]},
+            "Dark MortelCygne": {hp: 200, skills: [{n:'Ombre',v:20,t:'dmg',cd:0},{n:'Vampire',v:40,t:'heal',cd:3},{n:'Griffe',v:45,t:'dmg',cd:1},{n:'Night',v:50,t:'dmg',cd:2},{n:'Black',v:60,t:'dmg',cd:2},{n:'Étreinte',v:75,t:'dmg',cd:3},{n:'Soul',v:100,t:'dmg',cd:5}]}
         };
 
+        // Configuration
         let pName = localStorage.getItem('char') || "House of Laura";
-        let diff = parseInt(localStorage.getItem('diff')) || 4;
+        let diff = parseInt(localStorage.getItem('diff')) || 1; // 1=Facile, 2=Normal, 3=Difficile, 4=Expert
         const eName = Object.keys(chars).filter(n => n !== pName)[0];
-
-        let pS = chars[pName].skills.slice(0, diff).map(s => ({...s, cdActuel: 0}));
-        let eS = chars[eName].skills.slice(0, diff).map(s => ({...s, cdActuel: 0}));
-
+        
+        let pS = chars[pName].skills.map(s => ({...s, cdActuel: 0}));
+        let eS = chars[eName].skills.map(s => ({...s, cdActuel: 0}));
         let pHP = chars[pName].hp, eHP = chars[eName].hp;
         let isPlayerTurn = true;
-
-        function endGame(won) {
-            document.getElementById('endModal').style.display = 'flex';
-            document.getElementById('modal-title').innerText = won ? "VICTOIRE !" : "DÉFAITE...";
-        }
 
         function updateUI() {
             document.getElementById('p-name').innerText = pName;
             document.getElementById('e-name').innerText = eName;
-            document.getElementById('p-hp').innerText = `${Math.max(0, pHP)}/${chars[pName].hp}`;
-            document.getElementById('e-hp').innerText = `${Math.max(0, eHP)}/${chars[eName].hp}`;
+            document.getElementById('p-hp').innerText = `${Math.max(0, pHP)} / ${chars[pName].hp}`;
+            document.getElementById('e-hp').innerText = `${Math.max(0, eHP)} / ${chars[eName].hp}`;
             document.getElementById('p-bar').style.width = (Math.max(0, pHP) / chars[pName].hp * 100) + "%";
             document.getElementById('e-bar').style.width = (Math.max(0, eHP) / chars[eName].hp * 100) + "%";
-            renderButtons();
+            renderActions();
         }
 
-        function renderButtons() {
+        function renderActions() {
             const container = document.getElementById('actions');
             container.innerHTML = '';
             pS.forEach((s, i) => {
                 let b = document.createElement('button');
                 b.className = 'btn';
-                b.style.display = "flex"; b.style.flexDirection = "column"; b.style.alignItems = "center";
-                if(i === 6) b.style.gridColumn = "span 2";
-                
-                if(s.cdActuel > 0) {
-                    b.style.opacity = "0.5";
-                    b.innerHTML = `<strong>${s.n}</strong><small>Recharge: ${s.cdActuel}</small>`;
-                    b.disabled = true;
-                } else {
-                    b.innerHTML = `<strong>${s.n}</strong><small>CD: ${s.cd} | ${s.t === 'heal' ? '+' : ''}${s.v} ${s.t}</small>`;
-                    b.onclick = () => play(i);
-                }
+                b.disabled = !isPlayerTurn || s.cdActuel > 0;
+                b.innerHTML = `<strong>${s.n}</strong><br><small>${s.t=='dmg'?s.v+' dmg':s.v+' heal'} ${s.cd>0?'(CD:'+s.cd+')':''}</small>`;
+                b.onclick = () => playerMove(i);
                 container.appendChild(b);
             });
         }
 
-        function play(i) {
-            if(!isPlayerTurn || pS[i].cdActuel > 0) return;
-            
-            if(pS[i].t === 'dmg') eHP -= pS[i].v;
-            else pHP = Math.min(chars[pName].hp, pHP + pS[i].v);
-            
-            pS[i].cdActuel = pS[i].cd + 1;
-            document.getElementById('log').innerText = `Tu as utilisé ${pS[i].n} !`;
+        function playerMove(i) {
+            let s = pS[i];
+            if(s.t === 'dmg') { eHP -= s.v; document.getElementById('e-bar').classList.add('shaking'); setTimeout(()=>document.getElementById('e-bar').classList.remove('shaking'), 400); }
+            else { pHP = Math.min(chars[pName].hp, pHP + s.v); }
+            s.cdActuel = s.cd + 1;
+            document.getElementById('log').innerText = `Tu as utilisé ${s.n} !`;
+            isPlayerTurn = false;
             updateUI();
-            
             if(eHP <= 0) endGame(true);
-            else { isPlayerTurn = false; setTimeout(aiTurn, 1000); }
+            else setTimeout(aiTurn, 1000);
         }
 
         function aiTurn() {
             pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
+            eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
             
-            let dispo = eS.filter(s => s.cdActuel === 0);
-            if(dispo.length > 0) {
-                let s = dispo[Math.floor(Math.random() * dispo.length)];
-                if(s.t === 'dmg') pHP -= s.v;
-                else eHP = Math.min(chars[eName].hp, eHP + s.v);
-                s.cdActuel = s.cd + 1;
-                document.getElementById('log').innerText = `${eName} utilise ${s.n} !`;
-            } else {
-                document.getElementById('log').innerText = `${eName} attend...`;
+            let av = eS.filter(s => s.cdActuel === 0);
+            let move;
+
+            // Logique IA adaptative
+            if(diff >= 4) { // Expert : Le meilleur coup
+                move = av.find(s => s.t==='dmg' && s.v >= pHP) || av.find(s => s.t==='heal' && eHP < chars[eName].hp*0.5) || av.sort((a,b) => b.v - a.v)[0];
+            } else if(diff >= 3) { // Difficile : Priorité attaque
+                move = av.find(s => s.t==='dmg' && s.v >= pHP) || av.sort((a,b) => b.v - a.v)[0];
+            } else if(diff === 2) { // Normal : Random mais malin
+                move = av[Math.floor(Math.random() * av.length)];
+            } else { // Facile : Random total
+                move = av[Math.floor(Math.random() * av.length)];
             }
 
-            eS.forEach(sk => { if(sk.cdActuel > 0) sk.cdActuel--; });
-            updateUI();
+            if(move) {
+                if(move.t === 'dmg') { pHP -= move.v; document.getElementById('p-bar').classList.add('shaking'); setTimeout(()=>document.getElementById('p-bar').classList.remove('shaking'), 400); }
+                else { eHP = Math.min(chars[eName].hp, eHP + move.v); }
+                move.cdActuel = move.cd + 1;
+                document.getElementById('log').innerText = `${eName} utilise ${move.n} !`;
+            }
             
+            updateUI();
             if(pHP <= 0) endGame(false);
-            else isPlayerTurn = true;
+            else { isPlayerTurn = true; renderActions(); }
+        }
+
+        function endGame(win) {
+            document.getElementById('endModal').style.display = 'flex';
+            document.getElementById('modal-title').innerText = win ? "VICTOIRE !" : "DÉFAITE...";
         }
 
         updateUI();
     </script>
 </body>
 </html>
+
