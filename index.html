@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOL BATTLE GAME</title>
-    <!-- Le lien vers ton fichier style.css est ici -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,31 +11,33 @@
     <div class="container">
         <h1>HOL BATTLE GAME</h1>
         
-        <!-- Boutons d'action -->
         <button class="btn" onclick="location.href='difficulte.html'">Jouer</button>
-        <button class="btn" onclick="openRules()">Règles & Actus</button>
+        <button class="btn" id="btnRules" style="background: #9146ff;">Règles & Actus</button>
     </div>
 
-    <!-- Fenêtre Pop-up pour les règles -->
     <div id="rulesModal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeRules()">&times;</span>
+            <span id="closeModal" style="float:right; cursor:pointer; font-size: 24px;">&times;</span>
             <h2>📜 Règles & Actualités</h2>
-            <p>• <b>Héros Uniques :</b> Chaque personnage possède ses propres compétences.</p>
-            <p>• <b>Difficulté :</b> Ajuste le nombre de compétences (2, 4, 6, 7).</p>
-            <p>• <b>Système de Combat :</b> Gère bien tes dégâts et tes soins !</p>
-            <p>🔥 <b>À venir :</b> Mode Boss Battle (15 niveaux) !</p>
+            <p><b>Comment jouer :</b> Choisis ta difficulté, ton héros, et affronte l'IA.</p>
+            <p>• <b>Héros Uniques :</b> Chaque personnage possède ses propres compétences !</p>
+            <p>• <b>Système :</b> Gère bien tes capacités.</p>
+            <p>• <b>Difficulté :</b> Facile: 2 | Normal: 4 | Difficile: 6 | Expert: 7</p>
+            <p style="color: #00ff00;">🔥 À venir : Mode Boss Battle (15 niveaux) !</p>
         </div>
     </div>
 
     <script>
-        function openRules() {
-            document.getElementById('rulesModal').style.display = 'flex';
-        }
-        function closeRules() {
-            document.getElementById('rulesModal').style.display = 'none';
+        // Logique pour ouvrir et fermer la fenêtre
+        const modal = document.getElementById("rulesModal");
+        const btn = document.getElementById("btnRules");
+        const span = document.getElementById("closeModal");
+
+        btn.onclick = function() { modal.style.display = "flex"; }
+        span.onclick = function() { modal.style.display = "none"; }
+        window.onclick = function(event) {
+            if (event.target == modal) { modal.style.display = "none"; }
         }
     </script>
-
 </body>
 </html>
