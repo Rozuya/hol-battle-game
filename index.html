@@ -4,32 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOL Battle Game - Menu</title>
-    <link rel="stylesheet" href="style.css">
     
-    <!-- On met le style du Pop-up directement ici pour garantir qu'il s'affiche bien par-dessus l'écran -->
     <style>
+        /* --- DESIGN DU MENU --- */
+        body { 
+            background-color: #0e0e10; 
+            color: #efeff1; 
+            font-family: sans-serif; 
+            margin: 0; 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .container { 
+            background: #1f1f23; 
+            padding: 30px; 
+            border-radius: 12px; 
+            text-align: center; 
+            width: 100%; 
+            max-width: 400px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6); 
+        }
+        h1 { 
+            color: #9146ff; 
+            margin-top: 0;
+            margin-bottom: 30px; 
+            text-transform: uppercase; 
+        }
+        .btn-main { 
+            background: #9146ff; 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            width: 100%; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+            cursor: pointer; 
+            margin-bottom: 15px; 
+            transition: background 0.2s;
+        }
+        .btn-main:hover { background: #7b2cbf; }
+        .btn-secondary { background: #3a3a3c; }
+        .btn-secondary:hover { background: #4a4a4c; }
+
+        /* --- DESIGN DE LA FENÊTRE POP-UP (Parfaitement Centrée) --- */
         .modal { 
-            display: none; /* Caché par défaut */
-            position: fixed; /* Flotte par-dessus tout le reste */
+            display: none; 
+            position: fixed; 
             z-index: 1000; 
             left: 0; 
             top: 0; 
             width: 100%; 
             height: 100%; 
-            background: rgba(0,0,0,0.85); /* Fond sombre transparent */
+            background: rgba(0,0,0,0.85); 
         }
         .modal-content { 
             background: #18181c; 
-            margin: 15vh auto; /* Centré verticalement */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
             padding: 25px; 
             border: 2px solid #9146ff; 
             border-radius: 12px; 
             width: 90%; 
             max-width: 450px; 
             text-align: left; 
-            position: relative; 
-            box-shadow: 0 0 20px rgba(145, 70, 255, 0.5); /* Petit effet lumineux */
-            color: white;
+            box-shadow: 0 0 20px rgba(145, 70, 255, 0.5); 
+            box-sizing: border-box;
         }
         .close-btn { 
             position: absolute; 
@@ -40,19 +87,18 @@
             color: #ccc; 
             font-weight: bold;
         }
-        .close-btn:hover { 
-            color: #9146ff; 
-        }
+        .close-btn:hover { color: #9146ff; }
         .modal-content ul { padding-left: 20px; }
-        .modal-content li { margin-bottom: 10px; }
+        .modal-content li { margin-bottom: 12px; line-height: 1.4; }
+        .teasing { color: #2ecc71; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1 style="color: #9146ff; text-transform: uppercase;">HOL Battle Game</h1>
+        <h1>HOL Battle Game</h1>
         <button class="btn-main" onclick="window.location.href='difficulte.html'">🎮 Jouer</button>
-        <button class="btn-main" style="background: #3a3a3c;" onclick="document.getElementById('rules-modal').style.display='block'">📜 Règles & Actus</button>
+        <button class="btn-main btn-secondary" onclick="document.getElementById('rules-modal').style.display='block'">📜 Règles & Actus</button>
     </div>
 
     <!-- La fenêtre Pop-up qui s'affiche par-dessus -->
@@ -60,12 +106,13 @@
         <div class="modal-content" onclick="event.stopPropagation()">
             <span class="close-btn" onclick="document.getElementById('rules-modal').style.display='none'">&times;</span>
             <h2 style="margin-top: 0; color: #9146ff;">📜 Règles & Actualités</h2>
-            <p><strong>Comment jouer :</strong> Choisis ta difficulté, ton héros, et affronte l'ennemi.</p>
+            <p><strong>Comment jouer :</strong> Choisis ta difficulté, ton héros, et affronte l'IA.</p>
             <ul>
-                <li><strong>Système de Cooldown :</strong> Tes compétences ont un temps de recharge. Ne spammez pas !</li>
+                <li><strong>Héros Uniques :</strong> Chaque personnage de la House possède désormais ses propres compétences personnalisées !</li>
+                <li><strong>Système de Cooldown :</strong> Tes compétences ont un temps de recharge. Gère-les bien !</li>
                 <li><strong>Compétences débloquées :</strong><br>Facile : 2 | Normal : 4 | Difficile : 6 | Expert : 7</li>
             </ul>
-            <p style="color: #2ecc71; font-weight: bold; margin-top: 20px;">🔥 À venir : Mode Boss Battle (15 niveaux) !</p>
+            <p class="teasing">🔥 À venir : Mode Boss Battle (15 niveaux) !</p>
         </div>
     </div>
 
