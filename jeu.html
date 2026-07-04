@@ -6,15 +6,54 @@
     <title>Combat HOL</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Ajout d'un style pour bien gérer la grille */
-        #actions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+        /* Modale Pop-up */
+        .modal-overlay {
+            display: none; /* Caché par défaut */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #1e1e1e;
+            padding: 30px;
+            border: 2px solid #9146ff;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            width: 80%;
+            max-width: 300px;
+        }
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn-modal {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
+
+    <!-- Fenêtre Pop-up de fin -->
+    <div id="endModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modal-title">Victoire !</h2>
+            <div class="modal-btns">
+                <button class="btn-modal" onclick="location.reload()" style="background: #46ff55;">Rejouer</button>
+                <button class="btn-modal" onclick="window.location.href='index.html'" style="background: #555;">Accueil</button>
+            </div>
+        </div>
+    </div>
 
     <div class="container" style="max-width: 600px;">
         <div style="display: flex; gap: 20px; margin-bottom: 30px;">
@@ -31,12 +70,11 @@
         </div>
 
         <h2 id="log" style="font-size: 1.1rem; margin: 25px 0; text-align: center; color: #9146ff;">À toi de jouer !</h2>
-        <div id="actions"></div>
+        <div id="actions" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
     </div>
 
     <script>
         const chars = {
-            // Nouveaux noms pour la streameuse
             "House of Laura": {hp: 200, skills:[{n:'Chat Spam',v:20,t:'dmg',cd:0},{n:'BRB',v:25,t:'heal',cd:2},{n:'Host Raid',v:40,t:'dmg',cd:2},{n:'Sub Gift',v:50,t:'heal',cd:3},{n:'Donation',v:60,t:'dmg',cd:2},{n:'Stream Event',v:80,t:'dmg',cd:4},{n:'Partner Prime',v:100,t:'dmg',cd:5}]},
             "HOL Rozuya": {hp: 150, skills:[{n:'Code',v:15,t:'dmg',cd:0},{n:'Soin',v:30,t:'heal',cd:2},{n:'Debug',v:25,t:'dmg',cd:1},{n:'Backup',v:40,t:'heal',cd:3},{n:'Panic',v:50,t:'dmg',cd:2},{n:'Flash',v:65,t:'dmg',cd:3},{n:'System',v:85,t:'dmg',cd:5}]},
             "HOL Tony": {hp: 300, skills:[{n:'Bloc',v:10,t:'dmg',cd:0},{n:'Cri',v:15,t:'dmg',cd:1},{n:'Soin',v:30,t:'heal',cd:3},{n:'Rush',v:35,t:'dmg',cd:2},{n:'Charge',v:45,t:'dmg',cd:2},{n:'Impact',v:60,t:'dmg',cd:3},{n:'Mur',v:90,t:'dmg',cd:5}]},
@@ -55,6 +93,11 @@
         let pHP = chars[pName].hp, eHP = chars[eName].hp;
         let isPlayerTurn = true;
 
+        function endGame(won) {
+            document.getElementById('endModal').style.display = 'flex';
+            document.getElementById('modal-title').innerText = won ? "VICTOIRE !" : "DÉFAITE...";
+        }
+
         function updateUI() {
             document.getElementById('p-name').innerText = pName;
             document.getElementById('e-name').innerText = eName;
@@ -72,8 +115,6 @@
                 let b = document.createElement('button');
                 b.className = 'btn';
                 b.style.display = "flex"; b.style.flexDirection = "column"; b.style.alignItems = "center";
-                
-                // Si c'est le 7ème bouton (index 6), on le centre sur toute la largeur
                 if(i === 6) b.style.gridColumn = "span 2";
                 
                 if(s.cdActuel > 0) {
@@ -95,11 +136,10 @@
             else pHP = Math.min(chars[pName].hp, pHP + pS[i].v);
             
             pS[i].cdActuel = pS[i].cd + 1;
-            
             document.getElementById('log').innerText = `Tu as utilisé ${pS[i].n} !`;
             updateUI();
             
-            if(eHP <= 0) alert("Victoire !");
+            if(eHP <= 0) endGame(true);
             else { isPlayerTurn = false; setTimeout(aiTurn, 1000); }
         }
 
@@ -109,10 +149,8 @@
             let dispo = eS.filter(s => s.cdActuel === 0);
             if(dispo.length > 0) {
                 let s = dispo[Math.floor(Math.random() * dispo.length)];
-                
                 if(s.t === 'dmg') pHP -= s.v;
                 else eHP = Math.min(chars[eName].hp, eHP + s.v);
-                
                 s.cdActuel = s.cd + 1;
                 document.getElementById('log').innerText = `${eName} utilise ${s.n} !`;
             } else {
@@ -120,8 +158,10 @@
             }
 
             eS.forEach(sk => { if(sk.cdActuel > 0) sk.cdActuel--; });
-            isPlayerTurn = true;
             updateUI();
+            
+            if(pHP <= 0) endGame(false);
+            else isPlayerTurn = true;
         }
 
         updateUI();
