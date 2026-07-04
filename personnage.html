@@ -9,8 +9,8 @@
 <body>
 
     <div class="container">
-        <h1 style="color: #9146ff; margin-bottom: 30px;">Choisis ton héros</h1>
-        <div id="roster" style="display: flex; flex-direction: column; gap: 15px;"></div>
+        <h1>Choisis ton héros</h1>
+        <div id="roster" style="display: flex; flex-direction: column; gap: 5px;"></div>
     </div>
 
     <script>
@@ -28,15 +28,15 @@
         Object.keys(chars).forEach(name => {
             let b = document.createElement('button');
             b.className = 'btn';
-            b.style.height = "auto";
             b.style.padding = "20px";
             b.style.textAlign = "center";
-            // Affiche le nom en gros et le rôle en dessous
-            b.innerHTML = `<strong>${name}</strong><br><small style="color: #ccc;">${chars[name]}</small>`;
+            b.style.height = "auto";
             
-            b.onclick = function() { 
+            b.innerHTML = `<strong>${name}</strong><br><small style="color: #aaa; font-size: 0.9rem;">${chars[name]}</small>`;
+            
+            b.onclick = () => { 
                 localStorage.setItem('char', name); 
-                window.location.href = 'jeu.html'; 
+                location.href = 'jeu.html'; 
             };
             rosterDiv.appendChild(b);
         });
