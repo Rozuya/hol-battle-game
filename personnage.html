@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choix du Héros</title>
+    <title>Choisis ton héros</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h1>Choisis ton Héros</h1>
-        <div id="roster" class="roster"></div>
+        <h1 style="color: #9146ff; margin-bottom: 30px;">Choisis ton héros</h1>
+        <div id="roster" style="display: flex; flex-direction: column; gap: 15px;"></div>
     </div>
 
     <script>
-        // Les 6 personnages avec leur rôle
         const chars = {
-            "House of Laura": { type: "Support", hp: 260 },
-            "HOL Rozuya": { type: "DPS", hp: 230 },
-            "HOL Tony": { type: "Tank", hp: 300 },
-            "HOL Omass": { type: "DPS", hp: 250 },
-            "K974YT": { type: "Assassin", hp: 200 },
-            "Dark MortelCygne": { type: "Tank", hp: 220 }
+            "House of Laura": "Équilibré",
+            "HOL Rozuya": "Soutien / Soigneur",
+            "HOL Tony": "Tank / Force",
+            "HOL Omass": "Offensif",
+            "K974YT": "Assassin / Burst",
+            "Dark MortelCygne": "Vampire (Agressif)"
         };
 
         const rosterDiv = document.getElementById('roster');
@@ -29,11 +28,15 @@
         Object.keys(chars).forEach(name => {
             let b = document.createElement('button');
             b.className = 'btn';
-            // On affiche le nom et le rôle en petit en dessous
-            b.innerHTML = `<strong>${name}</strong><br><small style="color: #9146ff;">${chars[name].type}</small>`;
+            // Le style ici force l'aspect de ta capture d'écran
+            b.style.height = "auto";
+            b.style.padding = "20px";
+            b.style.textAlign = "center";
+            b.innerHTML = `<strong>${name}</strong><br><small style="color: #ccc;">${chars[name]}</small>`;
+            
             b.onclick = () => { 
                 localStorage.setItem('char', name); 
-                location.href = 'combat.html'; 
+                location.href = 'jeu.html'; 
             };
             rosterDiv.appendChild(b);
         });
