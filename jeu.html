@@ -42,6 +42,15 @@
         </div>
     </div>
 
+    <!-- Fenêtre de fin de partie -->
+    <div id="end-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000;">
+        <div style="background: #1a1a1a; padding: 30px; border: 2px solid #9146ff; border-radius: 15px; text-align: center; color: white;">
+            <h1 id="end-title" style="color: #9146ff; margin-bottom: 20px;"></h1>
+            <button onclick="location.reload()" style="padding: 10px 20px; margin: 5px; cursor: pointer; background: #9146ff; color: white; border: none; border-radius: 5px;">Rejouer</button>
+            <button onclick="window.location.href='index.html'" style="padding: 10px 20px; margin: 5px; cursor: pointer; background: #333; color: white; border: none; border-radius: 5px;">Accueil</button>
+        </div>
+    </div>
+
     <script>
         const diff = localStorage.getItem('diff') || 'normal';
         let pHP, eHP, pMaxHP, eMaxHP, active=true;
@@ -110,7 +119,7 @@
             let hero = charData[n];
             let d = document.createElement('button');
             d.className = 'character-card';
-            d.innerHTML = `${n}<br><span style="font-size: 0.7rem; opacity: 0.8;">${hero.role}</span>`;
+            d.innerHTML = `<span style="color: #9146ff; font-weight: bold;">${n}</span><br><span style="font-size: 0.7rem; color: #9146ff; opacity: 0.8;">${hero.role}</span>`;
             d.onclick = () => start(n);
             document.getElementById('roster').appendChild(d);
         });
@@ -163,10 +172,12 @@
             
             document.getElementById('log').innerText = (isPlayer ? playerName : enemyName) + " utilise " + s.name + " !";
             updateUI();
+            
             if(pHP <= 0 || eHP <= 0) {
                 document.getElementById('battle-screen').style.display = 'none';
-                alert(pHP > 0 ? "Victoire !" : "Défaite...");
-                location.reload();
+                const endScreen = document.getElementById('end-screen');
+                endScreen.style.display = 'flex';
+                document.getElementById('end-title').innerText = pHP > 0 ? "Victoire !" : "Défaite...";
             }
         }
 
