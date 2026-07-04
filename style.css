@@ -1,18 +1,18 @@
-body { background: #121212; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; }
-.container { width: 100%; max-width: 500px; margin: auto; }
+/* Style Global */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+body { background: #121212; color: white; display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+.container { width: 100%; max-width: 500px; text-align: center; }
 
-/* Boutons adaptés au touch (mobile) et souris (PC) */
-.btn { 
-    display: block; width: 100%; padding: 18px; margin: 10px 0; 
-    background: #1a1a1a; border: 2px solid #9146ff; color: white; 
-    border-radius: 10px; font-weight: bold; cursor: pointer; text-align: center;
-}
-.btn:hover { background: #9146ff; }
+/* Boutons */
+.btn { display: block; width: 100%; padding: 15px; margin: 10px 0; background: #9146ff; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.btn:hover { background: #7733cc; }
 
-/* Grille des héros (2 colonnes) */
+/* Modals (Pop-ups) */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: #1a1a1a; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; border: 2px solid #9146ff; }
+
+/* Combat */
 .roster { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-/* Arène combat */
-.arena { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
-.health-bar { flex: 1; height: 15px; background: #333; border-radius: 8px; overflow: hidden; }
-.bar-fill { height: 100%; width: 100%; background: #9146ff; transition: 0.3s; }
+.health-bar { height: 20px; background: #333; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+.bar { height: 100%; background: #9146ff; transition: 0.3s; }
+.skill-info { font-size: 0.75rem; color: #aaa; margin-top: 4px; }
