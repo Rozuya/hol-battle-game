@@ -20,8 +20,20 @@
         .skill { padding: 15px 10px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; font-size: 0.9rem; line-height: 1.4; transition: 0.2s; }
         .skill:hover:not(:disabled) { background: #9146ff; }
         
-        /* Style pour les compétences en cooldown */
         .skill:disabled { background: #222; border-color: #555; color: #777; cursor: not-allowed; }
+
+        /* Styles pour l'écran de fin */
+        .btn-layout { display: none; margin-top: 25px; gap: 15px; justify-content: center; }
+        
+        .btn-replay { padding: 14px 24px; background: #9146ff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: 0.2s; }
+        .btn-replay:hover { background: #a970ff; }
+
+        .btn-home { padding: 14px 24px; background: #222; color: white; border: 1px solid #555; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: 0.2s; }
+        .btn-home:hover { background: #333; border-color: #ff4646; }
+        
+        #end-title { font-size: 2rem; font-weight: bold; margin-top: 20px; display: none; }
+        .victory-text { color: #4caf50; }
+        .defeat-text { color: #ff4646; }
     </style>
 </head>
 <body>
@@ -29,6 +41,7 @@
     <div class="container" id="selection-screen">
         <h1>Choisis ton héros</h1>
         <div id="roster"></div>
+        <button class="btn-home" onclick="goToMainMenu()" style="width: 100%; margin-top: 20px;">↩ Retour au Menu Principal</button>
     </div>
 
     <div class="container" id="battle-screen" style="display: none;">
@@ -40,14 +53,21 @@
             </div>
             <div style="flex:1">
                 <h3 id="e-name"></h3>
-                <div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div>
+                <div class="health-bar-bg"><div id="e-bar" class="health-fill" style="background: #ff4646;"></div></div>
                 <div class="hp-text" id="e-hp"></div>
             </div>
         </div>
         
-        <div id="log" style="margin: 20px 0; font-weight: bold; color: #9146ff; font-size: 1.1rem;">Que le combat commence !</div>
+        <div id="log" style="margin: 20px 0; font-weight: bold; color: #9146ff; font-size: 1.1rem; height: 3em; display: flex; align-items: center; justify-content: center;">Que le combat commence !</div>
         
         <div class="action-grid" id="actions"></div>
+
+        <div id="end-title"></div>
+
+        <div id="end-actions" class="btn-layout">
+            <button class="btn-replay" onclick="backToMenu()">Rejouer</button>
+            <button class="btn-home" onclick="goToMainMenu()">Accueil</button>
+        </div>
     </div>
 
     <script>
@@ -110,9 +130,11 @@
 
         const heroes = Object.keys(charData);
         
-        // Variables globales pour le combat
-        let pSkills = [];
-        let pCurrentCooldowns = []; // Tableau qui va tracker les cooldowns actuels
+        let pHP, eHP, pMaxHP, eMaxHP;
+        let pSkills = [], eSkills = [];
+        let pCurrentCooldowns = [], eCurrentCooldowns = [];
+        let gameActive = true;
+        let currentDifficulty = 'normal';
 
         window.onload = () => {
             const roster = document.getElementById('roster');
@@ -126,34 +148,46 @@
         };
 
         function start(playerName) {
-            let diff = localStorage.getItem('diff') || 'normal';
-            let limit = diff === 'facile' ? 2 : diff === 'normal' ? 4 : diff === 'difficile' ? 6 : 7;
+            gameActive = true;
+            currentDifficulty = localStorage.getItem('diff') || 'normal';
+            let limit = currentDifficulty === 'facile' ? 2 : currentDifficulty === 'normal' ? 4 : currentDifficulty === 'difficile' ? 6 : 7;
 
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('battle-screen').style.display = 'block';
+            document.getElementById('actions').style.display = 'grid'; // Affiche la grille de sorts
+            document.getElementById('end-title').style.display = 'none'; // Cache le titre de fin
+            document.getElementById('end-actions').style.display = 'none'; // Cache les boutons de fin
+            document.getElementById('log').innerHTML = "Que le combat commence !";
 
             let availableEnemies = heroes.filter(h => h !== playerName);
             let enemyName = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
 
-            let pMaxHP = charData[playerName].hp;
-            let eMaxHP = charData[enemyName].hp;
+            pMaxHP = pHP = charData[playerName].hp;
+            eMaxHP = eHP = charData[enemyName].hp;
 
             document.getElementById('p-name').innerText = playerName;
             document.getElementById('e-name').innerText = enemyName;
-            document.getElementById('p-hp').innerText = `${pMaxHP}/${pMaxHP}`;
-            document.getElementById('e-hp').innerText = `${eMaxHP}/${eMaxHP}`;
 
-            // Récupère les compétences filtrées
             pSkills = charData[playerName].skills.slice(0, limit);
+            eSkills = charData[enemyName].skills.slice(0, limit);
             
-            // Initialiser les cooldowns à 0 pour chaque compétence
             pCurrentCooldowns = new Array(pSkills.length).fill(0);
+            eCurrentCooldowns = new Array(eSkills.length).fill(0);
 
-            updateUI(); // Affiche les boutons
+            updateHealthBars();
+            updateUI();
         }
 
-        // Fonction séparée pour afficher/mettre à jour les boutons selon leurs cooldowns
+        function updateHealthBars() {
+            document.getElementById('p-hp').innerText = `${pHP}/${pMaxHP}`;
+            document.getElementById('e-hp').innerText = `${eHP}/${eMaxHP}`;
+
+            document.getElementById('p-bar').style.width = Math.max(0, (pHP / pMaxHP) * 100) + '%';
+            document.getElementById('e-bar').style.width = Math.max(0, (eHP / eMaxHP) * 100) + '%';
+        }
+
         function updateUI() {
+            if (!gameActive) return;
             const actions = document.getElementById('actions');
             actions.innerHTML = ''; 
 
@@ -163,43 +197,166 @@
                 
                 let effectText = s.dmg > 0 ? `${s.dmg} Dmg` : `+${s.heal} PV`;
                 
-                // Si le cooldown actuel est plus grand que 0, on change le texte
                 if (pCurrentCooldowns[index] > 0) {
-                    btn.innerHTML = `<b>${s.name}</b><br>${effectText}<br><span style="color:red;">En recharge (${pCurrentCooldowns[index]} T)</span>`;
-                    btn.disabled = true; // Empêche de cliquer
+                    btn.innerHTML = `<b>${s.name}</b><br>${effectText}<br><span style="color:red;">(${pCurrentCooldowns[index]} T)</span>`;
+                    btn.disabled = true;
                 } else {
                     btn.innerHTML = `<b>${s.name}</b><br>${effectText}<br>(${s.cd} CD)`;
-                    btn.onclick = () => play(index); // Autorise le clic
+                    btn.onclick = () => play(index);
                 }
                 
                 actions.appendChild(btn);
             });
         }
 
-        function play(skillIndex) {
-            let skill = pSkills[skillIndex];
-            
-            document.getElementById('log').innerText = `Tu as utilisé ${skill.name} !`;
-            
-            // --- TA LOGIQUE DE COMBAT ICI (enlever les PV, se soigner, etc.) ---
+        function disableAllButtons() {
+            const buttons = document.querySelectorAll('.skill');
+            buttons.forEach(btn => btn.disabled = true);
+        }
 
-            // GESTION DES COOLDOWNS :
-            // 1. Réduire de 1 le cooldown de tous les sorts qui sont en recharge
+        function endGame(victory) {
+            gameActive = false;
+            
+            // On cache la grille d'attaques pour faire de la place aux gros boutons de fin
+            document.getElementById('actions').style.display = 'none';
+            
+            const endTitle = document.getElementById('end-title');
+            endTitle.style.display = 'block';
+
+            if (victory) {
+                endTitle.className = "victory-text";
+                endTitle.innerHTML = "🎉 VICTOIRE !";
+                document.getElementById('log').innerHTML = "L'ennemi a été terrassé avec succès.";
+            } else {
+                endTitle.className = "defeat-text";
+                endTitle.innerHTML = "💀 DÉFAITE...";
+                document.getElementById('log').innerHTML = "Tu es tombé au combat.";
+            }
+
+            // Rend visible les boutons Rejouer / Accueil
+            document.getElementById('end-actions').style.display = 'flex';
+        }
+
+        function backToMenu() {
+            document.getElementById('battle-screen').style.display = 'none';
+            document.getElementById('selection-screen').style.display = 'block';
+        }
+
+        function goToMainMenu() {
+            window.location.href = 'index.html'; 
+        }
+
+        function play(skillIndex) {
+            if (!gameActive) return;
+            disableAllButtons();
+
+            let skill = pSkills[skillIndex];
+            let logMsg = `Tu utilises ${skill.name} !<br>`;
+            
+            if (skill.dmg > 0) {
+                eHP -= skill.dmg;
+                logMsg += `Tu infliges <span style="color:#ff4646;">${skill.dmg} dégâts</span>.`;
+            }
+            if (skill.heal > 0) {
+                pHP = Math.min(pMaxHP, pHP + skill.heal);
+                logMsg += `Tu te soignes de <span style="color:#4caf50;">${skill.heal} PV</span>.`;
+            }
+
+            document.getElementById('log').innerHTML = logMsg;
+            
             for (let i = 0; i < pCurrentCooldowns.length; i++) {
-                if (pCurrentCooldowns[i] > 0) {
-                    pCurrentCooldowns[i]--;
+                if (pCurrentCooldowns[i] > 0) pCurrentCooldowns[i]--;
+            }
+            if (skill.cd > 0) pCurrentCooldowns[skillIndex] = skill.cd;
+
+            updateHealthBars();
+
+            if (eHP <= 0) {
+                endGame(true);
+                return;
+            }
+
+            setTimeout(enemyTurn, 1500);
+        }
+
+        function enemyTurn() {
+            if (!gameActive) return;
+
+            for (let i = 0; i < eCurrentCooldowns.length; i++) {
+                if (eCurrentCooldowns[i] > 0) eCurrentCooldowns[i]--;
+            }
+
+            let availableIndices = [];
+            for (let i = 0; i < eSkills.length; i++) {
+                if (eCurrentCooldowns[i] === 0) availableIndices.push(i);
+            }
+
+            let healSkills = availableIndices.filter(i => eSkills[i].heal > 0).sort((a, b) => eSkills[b].heal - eSkills[a].heal);
+            let dmgSkills = availableIndices.filter(i => eSkills[i].dmg > 0).sort((a, b) => eSkills[b].dmg - eSkills[a].dmg);
+
+            let chosenIndex = -1;
+
+            if (currentDifficulty === 'facile') {
+                let logicalChoices = [...availableIndices];
+                if (eHP >= eMaxHP * 0.8) {
+                    logicalChoices = logicalChoices.filter(i => eSkills[i].heal === 0);
+                }
+                if (eHP < eMaxHP * 0.35 && healSkills.length > 0) {
+                    chosenIndex = healSkills[0];
+                } else {
+                    chosenIndex = logicalChoices.length > 0 ? logicalChoices[Math.floor(Math.random() * logicalChoices.length)] : availableIndices[0];
+                }
+            } 
+            else if (currentDifficulty === 'normal') {
+                if (eHP < eMaxHP * 0.5 && healSkills.length > 0 && Math.random() < 0.7) {
+                    chosenIndex = healSkills[0];
+                } else {
+                    chosenIndex = dmgSkills.length > 0 ? dmgSkills[Math.floor(Math.random() * dmgSkills.length)] : availableIndices[0];
+                }
+            } 
+            else if (currentDifficulty === 'difficile') {
+                if (eHP <= eMaxHP * 0.4 && healSkills.length > 0) {
+                    chosenIndex = healSkills[0];
+                } else {
+                    chosenIndex = dmgSkills.length > 0 ? dmgSkills[0] : availableIndices[0];
+                }
+            } 
+            else {
+                let lethalSkill = dmgSkills.find(i => eSkills[i].dmg >= pHP);
+                if (lethalSkill !== undefined) {
+                    chosenIndex = lethalSkill;
+                } else if (eHP <= eMaxHP * 0.45 && healSkills.length > 0) {
+                    chosenIndex = healSkills[0];
+                } else {
+                    chosenIndex = dmgSkills.length > 0 ? dmgSkills[0] : availableIndices[0];
                 }
             }
 
-            // 2. Appliquer le cooldown max au sort qu'on vient juste d'utiliser
-            if (skill.cd > 0) {
-                pCurrentCooldowns[skillIndex] = skill.cd;
+            if (chosenIndex === -1) chosenIndex = availableIndices[0];
+
+            let eSkill = eSkills[chosenIndex];
+            let logMsg = `L'ennemi utilise ${eSkill.name} !<br>`;
+
+            if (eSkill.dmg > 0) {
+                pHP -= eSkill.dmg;
+                logMsg += `Il t'inflige <span style="color:#ff4646;">${eSkill.dmg} dégâts</span>.`;
+            }
+            if (eSkill.heal > 0) {
+                eHP = Math.min(eMaxHP, eHP + eSkill.heal);
+                logMsg += `Il se soigne de <span style="color:#4caf50;">${eSkill.heal} PV</span>.`;
             }
 
-            // 3. Mettre à jour l'affichage des boutons
-            updateUI();
-            
-            // --- TOUR DE L'ENNEMI ICI ---
+            document.getElementById('log').innerHTML = logMsg;
+
+            if (eSkill.cd > 0) eCurrentCooldowns[chosenIndex] = eSkill.cd;
+
+            updateHealthBars();
+
+            if (pHP <= 0) {
+                endGame(false);
+            } else {
+                updateUI();
+            }
         }
     </script>
 </body>
