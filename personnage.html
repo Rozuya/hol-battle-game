@@ -28,15 +28,15 @@
         Object.keys(chars).forEach(name => {
             let b = document.createElement('button');
             b.className = 'btn';
-            // Le style ici force l'aspect de ta capture d'écran
             b.style.height = "auto";
             b.style.padding = "20px";
             b.style.textAlign = "center";
+            // Affiche le nom en gros et le rôle en dessous
             b.innerHTML = `<strong>${name}</strong><br><small style="color: #ccc;">${chars[name]}</small>`;
             
-            b.onclick = () => { 
+            b.onclick = function() { 
                 localStorage.setItem('char', name); 
-                location.href = 'jeu.html'; 
+                window.location.href = 'jeu.html'; 
             };
             rosterDiv.appendChild(b);
         });
