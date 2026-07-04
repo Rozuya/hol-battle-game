@@ -10,34 +10,28 @@
 
     <div class="container">
         <h1>HOL BATTLE GAME</h1>
-        
         <button class="btn" onclick="location.href='difficulte.html'">Jouer</button>
         <button class="btn" id="btnRules" style="background: #9146ff;">Règles & Actus</button>
     </div>
 
+    <!-- Pop-up Règles -->
     <div id="rulesModal" class="modal">
         <div class="modal-content">
             <span id="closeModal" style="float:right; cursor:pointer; font-size: 24px;">&times;</span>
             <h2>📜 Règles & Actualités</h2>
-            <p><b>Comment jouer :</b> Choisis ta difficulté, ton héros, et affronte l'IA.</p>
-            <p>• <b>Héros Uniques :</b> Chaque personnage possède ses propres compétences !</p>
-            <p>• <b>Système :</b> Gère bien tes capacités.</p>
-            <p>• <b>Difficulté :</b> Facile: 2 | Normal: 4 | Difficile: 6 | Expert: 7</p>
-            <p style="color: #00ff00;">🔥 À venir : Mode Boss Battle (15 niveaux) !</p>
+            <p style="margin-bottom: 10px;"><b>Comment jouer :</b> Choisis ta difficulté, ton héros, et affronte l'IA.</p>
+            <p style="margin-bottom: 10px;">• <b>Héros Uniques :</b> Chaque personnage de la House possède ses propres compétences personnalisées !</p>
+            <p style="margin-bottom: 10px;">• <b>Système :</b> Tes compétences font des dégâts variés. Gère-les bien !</p>
+            <p style="margin-bottom: 15px;">• <b>Compétences débloquées :</b> Facile : 2 | Normal : 4 | Difficile : 6 | Expert : 7</p>
+            <p style="color: #00ff00; font-weight: bold; text-align: center;">🔥 À venir : Mode Boss Battle (15 niveaux) !</p>
         </div>
     </div>
 
     <script>
-        // Logique pour ouvrir et fermer la fenêtre
         const modal = document.getElementById("rulesModal");
-        const btn = document.getElementById("btnRules");
-        const span = document.getElementById("closeModal");
-
-        btn.onclick = function() { modal.style.display = "flex"; }
-        span.onclick = function() { modal.style.display = "none"; }
-        window.onclick = function(event) {
-            if (event.target == modal) { modal.style.display = "none"; }
-        }
+        document.getElementById("btnRules").onclick = () => modal.style.display = "flex";
+        document.getElementById("closeModal").onclick = () => modal.style.display = "none";
+        window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
     </script>
 </body>
 </html>
