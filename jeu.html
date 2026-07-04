@@ -2,90 +2,92 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Combat - HOL Battle Game</title>
+    <title>Combat HOL</title>
 </head>
 <body>
     <div class="container">
-        <!-- Sélection du héros -->
         <div id="roster" class="roster"></div>
-        
-        <!-- Zone de combat -->
         <div id="battle" style="display:none">
             <div class="arena">
-                <div><div id="p-name"></div><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div></div>
-                <div><div id="e-name"></div><div class="health-bar-bg"><div id="e-bar" class="health-fill" style="background:#ff4646"></div></div></div>
+                <div class="health-bar"><div id="p-bar" class="bar-fill"></div></div>
+                <div class="health-bar"><div id="e-bar" class="bar-fill" style="background:#ff4646"></div></div>
             </div>
-            <div id="log" style="padding: 15px; margin: 20px 0; background: #1a1a1a; border: 1px solid #9146ff; border-radius: 8px;">Prêt à combattre ?</div>
-            <div id="actions" class="action-grid"></div>
+            <div id="log" style="margin: 10px 0; color: #b3b3b3;">À toi de jouer !</div>
+            <div id="actions" class="roster"></div>
         </div>
     </div>
 
     <script>
-        const charData = { 
-            "House of Laura": {hp:260, skills:[{n:'Hype',d:40},{n:'Pause',d:10},{n:'Raid',d:60},{n:'Soutien',d:20}]}, 
-            "HOL Rozuya": {hp:230, skills:[{n:'Code',d:20},{n:'Debug',d:30},{n:'Compile',d:30},{n:'Backup',d:40}]} 
+        // Compétences triées par dégâts (d) croissants pour chaque héros
+        const chars = {
+            "House of Laura": {hp:260, skills:[{n:'Pause',d:10},{n:'Soutien',d:20},{n:'Hype',d:40},{n:'Combo',d:50},{n:'Raid',d:60},{n:'Ban',d:80},{n:'Mega',d:90}]},
+            "HOL Rozuya": {hp:230, skills:[{n:'Code',d:20},{n:'Soin',d:25},{n:'Debug',d:30},{n:'Compile',d:30},{n:'Backup',d:40},{n:'Panic',d:50},{n:'Flash',d:60}]},
+            "HOL Tony": {hp:300, skills:[{n:'Bloc',d:10},{n:'Cri',d:20},{n:'Tacle',d:30},{n:'Rush',d:40},{n:'Charge',d:50},{n:'Impact',d:55},{n:'Stun',d:20}]},
+            "HOL Omass": {hp:250, skills:[{n:'Rush',d:20},{n:'Kick',d:30},{n:'Punch',d:40},{n:'Slam',d:45},{n:'Combo',d:50},{n:'Uppercut',d:60},{n:'Fury',d:70}]},
+            "K974YT": {hp:200, skills:[{n:'Jump',d:20},{n:'Dash',d:25},{n:'Silent',d:30},{n:'Cut',d:40},{n:'Slash',d:50},{n:'Blade',d:65},{n:'Backstab',d:70}]},
+            "Dark MortelCygne": {hp:220, skills:[{n:'Ombre',d:25},{n:'Plume',d:30},{n:'Griffe',d:40},{n:'Night',d:50},{n:'Black',d:60},{n:'Étreinte',d:80},{n:'Soul',d:90}]}
         };
 
-        let count = localStorage.getItem('skillCount') || 4;
         let pName, eName, pHP, eHP, pMax, eMax, pS, eS, isPlayerTurn = true;
+        let diff = parseInt(localStorage.getItem('diff')) || 4;
 
-        // Génération du menu héros
-        Object.keys(charData).forEach(n => {
+        Object.keys(chars).forEach(n => {
             let b = document.createElement('button'); b.className = 'btn'; b.innerText = n;
             b.onclick = () => start(n); document.getElementById('roster').appendChild(b);
         });
 
         function start(n) {
-            pName = n; 
-            let ops = Object.keys(charData).filter(x => x !== n);
+            pName = n;
+            let ops = Object.keys(chars).filter(x => x !== n);
             eName = ops[Math.floor(Math.random() * ops.length)];
-            pHP = pMax = charData[pName].hp; eHP = eMax = charData[eName].hp;
-            pS = charData[pName].skills.slice(0, count);
-            eS = charData[eName].skills.slice(0, count);
+            pHP = pMax = chars[pName].hp;
+            eHP = eMax = chars[eName].hp;
+            // Limite le nombre de compétences selon la difficulté (2, 4, 6, 7)
+            pS = chars[pName].skills.slice(0, diff);
+            eS = chars[eName].skills.slice(0, diff);
             document.getElementById('roster').style.display = 'none';
             document.getElementById('battle').style.display = 'block';
             updateUI();
         }
 
+        function getAISkill() {
+            // Logique fixe selon la difficulté
+            let sorted = [...eS].sort((a,b) => a.d - b.d);
+            if(diff == 2) return sorted[0];           // Toujours la plus faible
+            if(diff == 4) return sorted[1];           // 2ème plus faible
+            if(diff == 6) return sorted[sorted.length-2]; // 2ème plus forte
+            return sorted[sorted.length-1];           // Toujours la plus forte
+        }
+
         function updateUI() {
-            document.getElementById('p-name').innerText = `${pName} (${pHP})`;
-            document.getElementById('e-name').innerText = `${eName} (${eHP})`;
             document.getElementById('p-bar').style.width = (pHP/pMax*100) + "%";
             document.getElementById('e-bar').style.width = (eHP/eMax*100) + "%";
-            
             let act = document.getElementById('actions'); act.innerHTML = '';
-            
             if(isPlayerTurn) {
                 pS.forEach((s, i) => {
-                    let b = document.createElement('button'); b.className = 'skill'; b.innerText = s.n;
+                    let b = document.createElement('button'); b.className = 'btn'; b.innerText = s.n;
                     b.onclick = () => play(i); act.appendChild(b);
                 });
-            } else {
-                act.innerHTML = '<p style="color:#9146ff; grid-column:span 2;">L\'IA réfléchit...</p>';
             }
         }
 
         function play(i) {
             if(!isPlayerTurn) return;
-            
-            // Tour Joueur
             eHP = Math.max(0, eHP - pS[i].d);
-            document.getElementById('log').innerText = `Tu as utilisé ${pS[i].n} (-${pS[i].d} HP)`;
             isPlayerTurn = false;
             updateUI();
-
-            if(eHP <= 0) { setTimeout(() => { alert("Victoire !"); location.reload(); }, 500); return; }
-
-            // Tour IA
-            setTimeout(() => {
-                let s = eS[Math.floor(Math.random() * eS.length)];
-                pHP = Math.max(0, pHP - s.d);
-                document.getElementById('log').innerText = `L'IA a utilisé ${s.n} (-${s.d} HP)`;
-                isPlayerTurn = true;
-                updateUI();
-                if(pHP <= 0) { setTimeout(() => { alert("Défaite..."); location.reload(); }, 500); }
-            }, 1500);
+            if(eHP > 0) {
+                setTimeout(() => {
+                    let s = getAISkill();
+                    pHP = Math.max(0, pHP - s.d);
+                    isPlayerTurn = true;
+                    document.getElementById('log').innerText = `L'IA a utilisé ${s.n}`;
+                    updateUI();
+                    if(pHP <= 0) { alert("Défaite !"); location.reload(); }
+                }, 1000);
+            } else { alert("Victoire !"); location.reload(); }
         }
     </script>
 </body>
