@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOL Battle Arena - Final</title>
+    <title>HOL Battle Arena</title>
     <style>
         body { background-color: #121212; color: white; display: flex; justify-content: center; min-height: 100vh; margin: 0; font-family: sans-serif; padding: 20px; box-sizing: border-box; }
         .container { width: 100%; max-width: 500px; text-align: center; }
-        h1 { margin-bottom: 25px; font-size: 1.8rem; }
+        h1 { margin-bottom: 25px; font-size: 1.8rem; color: #9146ff; }
         
-        /* Boutons de sélection avec rôle */
         .character-card { display: block; width: 100%; margin-bottom: 12px; padding: 15px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; }
         .character-card:hover { background: #9146ff; }
         .role-text { display: block; font-size: 0.85rem; color: #b1b1b1; margin-top: 4px; }
@@ -22,7 +21,6 @@
         .skill:hover:not(:disabled) { background: #9146ff; }
         .skill:disabled { background: #222; border-color: #444; color: #666; cursor: not-allowed; }
 
-        /* Log de combat propre */
         #log { margin: 20px 0; padding: 15px; background: #000; border: 1px solid #9146ff; border-radius: 8px; font-weight: bold; color: #fff; font-size: 1.05rem; line-height: 1.5; min-height: 50px; }
 
         .btn-end { padding: 15px 30px; background: #9146ff; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; margin: 10px; }
@@ -40,7 +38,7 @@
             <div style="flex:1"><h3 id="p-name"></h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div><div id="p-hp"></div></div>
             <div style="flex:1"><h3 id="e-name"></h3><div class="health-bar-bg"><div id="e-bar" class="health-fill" style="background: #ff4646;"></div></div><div id="e-hp"></div></div>
         </div>
-        <div id="log">Le combat commence !</div>
+        <div id="log">Le combat commence.</div>
         <div class="action-grid" id="actions"></div>
         <div id="end-area" style="display: none;">
             <h2 id="end-title"></h2>
@@ -100,12 +98,13 @@
 
         function play(i) {
             let s = pSkills[i];
-            let msg = `${pName} utilise <b>${s.name}</b> ! `;
-            if(s.dmg > 0) { eHP -= s.dmg; msg += `Il inflige ${s.dmg} Dégâts. `; }
-            if(s.heal > 0) { pHP = Math.min(pMax, pHP + s.heal); msg += `Il récupère ${s.heal} PV. `; }
+            let msg = `${pName} utilise ${s.name}.`;
+            if(s.dmg > 0) msg += ` Il inflige ${s.dmg} dégâts.`;
+            if(s.heal > 0) msg += ` Il récupère ${s.heal} PV.`;
+            
             pCD[i] = s.cd;
             pCD = pCD.map(x => Math.max(0, x - 1));
-            document.getElementById('log').innerHTML = msg;
+            document.getElementById('log').innerText = msg;
             updateUI();
             if(eHP <= 0) endGame(true);
             else setTimeout(enemyTurn, 1000);
@@ -116,12 +115,13 @@
             let i = eSkills.findIndex((s, idx) => eCD[idx] === 0);
             if(i === -1) i = 0;
             let s = eSkills[i];
-            let msg = `${eName} utilise <b>${s.name}</b> ! `;
-            if(s.dmg > 0) { pHP -= s.dmg; msg += `Il inflige ${s.dmg} Dégâts. `; }
-            if(s.heal > 0) { eHP = Math.min(eMax, eHP + s.heal); msg += `Il récupère ${s.heal} PV. `; }
+            let msg = `${eName} utilise ${s.name}.`;
+            if(s.dmg > 0) msg += ` Il inflige ${s.dmg} dégâts.`;
+            if(s.heal > 0) msg += ` Il récupère ${s.heal} PV.`;
+            
             eCD[i] = s.cd;
             eCD = eCD.map(x => Math.max(0, x - 1));
-            document.getElementById('log').innerHTML = msg;
+            document.getElementById('log').innerText = msg;
             updateUI();
             if(pHP <= 0) endGame(false);
         }
@@ -130,7 +130,7 @@
             active = false;
             document.getElementById('actions').style.display = 'none';
             document.getElementById('end-area').style.display = 'block';
-            document.getElementById('end-title').innerText = win ? "VICTOIRE !" : "DÉFAITE...";
+            document.getElementById('end-title').innerText = win ? "Victoire" : "Défaite";
         }
 
         Object.entries(charData).forEach(([name, data]) => {
