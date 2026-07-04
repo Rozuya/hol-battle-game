@@ -2,38 +2,32 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOL Battle Arena</title>
     <style>
-        body { background-color: #121212; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        body { background-color: #121212; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; font-family: sans-serif; }
+        .container { width: 90%; max-width: 600px; text-align: center; }
         .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
         #s-ult { grid-column: span 3; }
-        .skill { padding: 15px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; transition: 0.2s; height: 80px;}
+        .skill { padding: 10px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; height: 90px; font-size: 0.8rem; line-height: 1.2; }
         .skill:hover:not(:disabled) { background: #9146ff; }
-        .character-card { display: block; width: 100%; margin-bottom: 15px; padding: 20px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; transition: 0.2s; text-align: center; }
-        .health-bar-bg { background: #333; height: 20px; border-radius: 5px; overflow: hidden; margin: 5px; }
-        .health-fill { height: 100%; transition: width 0.5s; background: #9146ff; }
+        .character-card { display: block; width: 100%; margin-bottom: 10px; padding: 15px; background: #1a1a1a; border: 1px solid #9146ff; color: white; border-radius: 8px; cursor: pointer; }
+        .health-bar-bg { background: #333; height: 20px; border-radius: 5px; margin: 5px; }
+        .health-fill { height: 100%; background: #9146ff; width: 100%; transition: width 0.3s; }
     </style>
 </head>
 <body>
 
     <div class="container" id="selection-screen">
-        <h1 style="text-align: center;">Choisis ton héros</h1>
-        <div class="roster" id="roster"></div>
+        <h1>Choisis ton héros</h1>
+        <div id="roster"></div>
     </div>
 
     <div class="container" id="battle-screen" style="display: none;">
-        <div class="arena" style="text-align: center; max-width: 600px; margin: auto;">
-            <div style="display: flex; gap: 10px;">
-                <h3 style="flex: 1;" id="p-name"></h3>
-                <h3 style="flex: 1;" id="e-name"></h3>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <div class="health-bar-bg" style="flex: 1;"><div id="p-bar" class="health-fill" style="width: 100%;"></div></div>
-                <div class="health-bar-bg" style="flex: 1;"><div id="e-bar" class="health-fill" style="width: 100%;"></div></div>
-            </div>
+        <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+            <div style="flex:1"><h3 id="p-name"></h3><div class="health-bar-bg"><div id="p-bar" class="health-fill"></div></div></div>
+            <div style="flex:1"><h3 id="e-name"></h3><div class="health-bar-bg"><div id="e-bar" class="health-fill"></div></div></div>
         </div>
-        <div id="log" style="text-align: center; margin: 15px; color: #9146ff; font-weight: bold;"></div>
+        <div id="log" style="color: #9146ff; font-weight: bold; height: 2em; margin-bottom: 10px;"></div>
         <div class="action-grid" id="actions">
             <button class="skill" id="s-skill1" onclick="play('skill1')"></button>
             <button class="skill" id="s-skill2" onclick="play('skill2')"></button>
@@ -46,63 +40,60 @@
     </div>
 
     <script>
-        let pHP, eHP, pMaxHP, eMaxHP, playerName, enemyName, difficulty;
-        let pSkills = {}, eSkills = {};
-
         const charData = {
             "House of Laura": { hp: 150, skills: [
-                { id:'skill1', name: 'Hype du Chat', dmg: 15, heal: 0, lvl: 1 },
-                { id:'skill2', name: 'Pause Café', dmg: 0, heal: 20, lvl: 1 },
-                { id:'skill3', name: 'Raid Massif', dmg: 25, heal: 0, lvl: 2 },
-                { id:'skill4', name: 'Soutien des Subs', dmg: 0, heal: 40, lvl: 2 },
-                { id:'skill5', name: 'Mod Hammer', dmg: 35, heal: 0, lvl: 3 },
-                { id:'skill6', name: 'Clip Viral', dmg: 0, heal: 60, lvl: 3 },
-                { id:'ult', name: 'Ban Hammer Suprême', dmg: 50, heal: 0, lvl: 4 }
+                { id:'skill1', name: 'Hype du Chat', dmg: 15, heal: 0, cd: 0, lvl: 1 },
+                { id:'skill2', name: 'Pause Café', dmg: 0, heal: 20, cd: 1, lvl: 1 },
+                { id:'skill3', name: 'Raid Massif', dmg: 25, heal: 0, cd: 2, lvl: 2 },
+                { id:'skill4', name: 'Soutien des Subs', dmg: 0, heal: 40, cd: 3, lvl: 2 },
+                { id:'skill5', name: 'Mod Hammer', dmg: 35, heal: 0, cd: 3, lvl: 3 },
+                { id:'skill6', name: 'Clip Viral', dmg: 0, heal: 60, cd: 4, lvl: 3 },
+                { id:'ult', name: 'Ban Hammer Suprême', dmg: 50, heal: 0, cd: 5, lvl: 4 }
             ]},
             "HOL Rozuya": { hp: 130, skills: [
-                { id:'skill1', name: 'Ligne de Code', dmg: 12, heal: 0, lvl: 1 },
-                { id:'skill2', name: 'Corriger Bug', dmg: 0, heal: 25, lvl: 1 },
-                { id:'skill3', name: 'Compilation', dmg: 20, heal: 0, lvl: 2 },
-                { id:'skill4', name: 'Backup Serveur', dmg: 0, heal: 50, lvl: 2 },
-                { id:'skill5', name: 'Refactoring', dmg: 30, heal: 0, lvl: 3 },
-                { id:'skill6', name: 'Patch Sécurité', dmg: 0, heal: 70, lvl: 3 },
-                { id:'ult', name: 'Kernel Panic', dmg: 45, heal: 0, lvl: 4 }
+                { id:'skill1', name: 'Ligne de Code', dmg: 12, heal: 0, cd: 0, lvl: 1 },
+                { id:'skill2', name: 'Corriger Bug', dmg: 0, heal: 25, cd: 1, lvl: 1 },
+                { id:'skill3', name: 'Compilation', dmg: 20, heal: 0, cd: 2, lvl: 2 },
+                { id:'skill4', name: 'Backup Serveur', dmg: 0, heal: 50, cd: 3, lvl: 2 },
+                { id:'skill5', name: 'Refactoring', dmg: 30, heal: 0, cd: 3, lvl: 3 },
+                { id:'skill6', name: 'Patch Sécurité', dmg: 0, heal: 70, cd: 4, lvl: 3 },
+                { id:'ult', name: 'Kernel Panic', dmg: 45, heal: 0, cd: 5, lvl: 4 }
             ]},
             "HOL Tony": { hp: 190, skills: [
-                { id:'skill1', name: 'Coup de Poing', dmg: 18, heal: 0, lvl: 1 },
-                { id:'skill2', name: 'Boisson Énergie', dmg: 0, heal: 15, lvl: 1 },
-                { id:'skill3', name: 'Tacle Glissé', dmg: 30, heal: 0, lvl: 2 },
-                { id:'skill4', name: 'Second Souffle', dmg: 0, heal: 35, lvl: 2 },
-                { id:'skill5', name: 'Mur de Bouclier', dmg: 0, heal: 20, lvl: 3 },
-                { id:'skill6', name: 'Charge de Force', dmg: 40, heal: 0, lvl: 3 },
-                { id:'ult', name: 'Colosse Déchaîné', dmg: 60, heal: 0, lvl: 4 }
+                { id:'skill1', name: 'Coup de Poing', dmg: 18, heal: 0, cd: 0, lvl: 1 },
+                { id:'skill2', name: 'Boisson Énergie', dmg: 0, heal: 15, cd: 1, lvl: 1 },
+                { id:'skill3', name: 'Tacle Glissé', dmg: 30, heal: 0, cd: 2, lvl: 2 },
+                { id:'skill4', name: 'Second Souffle', dmg: 0, heal: 35, cd: 3, lvl: 2 },
+                { id:'skill5', name: 'Mur de Bouclier', dmg: 0, heal: 20, cd: 2, lvl: 3 },
+                { id:'skill6', name: 'Charge de Force', dmg: 40, heal: 0, cd: 4, lvl: 3 },
+                { id:'ult', name: 'Colosse Déchaîné', dmg: 60, heal: 0, cd: 6, lvl: 4 }
             ]},
             "HOL Omass": { hp: 160, skills: [
-                { id:'skill1', name: 'Tir Précis', dmg: 20, heal: 0, lvl: 1 },
-                { id:'skill2', name: 'Pansement Rapide', dmg: 0, heal: 10, lvl: 1 },
-                { id:'skill3', name: 'Balle Perçante', dmg: 35, heal: 0, lvl: 2 },
-                { id:'skill4', name: 'Trousse de Soin', dmg: 0, heal: 30, lvl: 2 },
-                { id:'skill5', name: 'Grenade Flash', dmg: 25, heal: 0, lvl: 3 },
-                { id:'skill6', name: 'Concentration', dmg: 45, heal: 0, lvl: 3 },
-                { id:'ult', name: 'Frappe Aérienne', dmg: 70, heal: 0, lvl: 4 }
+                { id:'skill1', name: 'Tir Précis', dmg: 20, heal: 0, cd: 0, lvl: 1 },
+                { id:'skill2', name: 'Pansement Rapide', dmg: 0, heal: 10, cd: 1, lvl: 1 },
+                { id:'skill3', name: 'Balle Perçante', dmg: 35, heal: 0, cd: 2, lvl: 2 },
+                { id:'skill4', name: 'Trousse de Soin', dmg: 0, heal: 30, cd: 3, lvl: 2 },
+                { id:'skill5', name: 'Grenade Flash', dmg: 25, heal: 0, cd: 3, lvl: 3 },
+                { id:'skill6', name: 'Concentration', dmg: 45, heal: 0, cd: 4, lvl: 3 },
+                { id:'ult', name: 'Frappe Aérienne', dmg: 70, heal: 0, cd: 6, lvl: 4 }
             ]},
             "K974YT": { hp: 140, skills: [
-                { id:'skill1', name: 'Clic Droit', dmg: 22, heal: 0, lvl: 1 },
-                { id:'skill2', name: 'Soin Manette', dmg: 0, heal: 12, lvl: 1 },
-                { id:'skill3', name: 'Coup Critique', dmg: 38, heal: 0, lvl: 2 },
-                { id:'skill4', name: 'Heal de Zone', dmg: 0, heal: 25, lvl: 2 },
-                { id:'skill5', name: 'Dash Offensif', dmg: 30, heal: 0, lvl: 3 },
-                { id:'skill6', name: 'Combo Rapide', dmg: 40, heal: 0, lvl: 3 },
-                { id:'ult', name: 'Explosion Finale', dmg: 65, heal: 0, lvl: 4 }
+                { id:'skill1', name: 'Clic Droit', dmg: 22, heal: 0, cd: 0, lvl: 1 },
+                { id:'skill2', name: 'Soin Manette', dmg: 0, heal: 12, cd: 1, lvl: 1 },
+                { id:'skill3', name: 'Coup Critique', dmg: 38, heal: 0, cd: 2, lvl: 2 },
+                { id:'skill4', name: 'Heal de Zone', dmg: 0, heal: 25, cd: 3, lvl: 2 },
+                { id:'skill5', name: 'Dash Offensif', dmg: 30, heal: 0, cd: 2, lvl: 3 },
+                { id:'skill6', name: 'Combo Rapide', dmg: 40, heal: 0, cd: 4, lvl: 3 },
+                { id:'ult', name: 'Explosion Finale', dmg: 65, heal: 0, cd: 6, lvl: 4 }
             ]},
             "Dark MortelCygne": { hp: 120, skills: [
-                { id:'skill1', name: 'Plume Noire', dmg: 18, heal: 0, lvl: 1 },
-                { id:'skill2', name: 'Saignée', dmg: 25, heal: 10, lvl: 1 },
-                { id:'skill3', name: 'Griffes du Néant', dmg: 35, heal: 0, lvl: 2 },
-                { id:'skill4', name: 'Festin Sanguin', dmg: 15, heal: 40, lvl: 2 },
-                { id:'skill5', name: 'Forme d Ombre', dmg: 10, heal: 20, lvl: 3 },
-                { id:'skill6', name: 'Pluie de Plumes', dmg: 45, heal: 0, lvl: 3 },
-                { id:'ult', name: 'Étreinte Mortelle', dmg: 80, heal: -20, lvl: 4 }
+                { id:'skill1', name: 'Plume Noire', dmg: 18, heal: 0, cd: 0, lvl: 1 },
+                { id:'skill2', name: 'Saignée', dmg: 25, heal: 10, cd: 1, lvl: 1 },
+                { id:'skill3', name: 'Griffes du Néant', dmg: 35, heal: 0, cd: 2, lvl: 2 },
+                { id:'skill4', name: 'Festin Sanguin', dmg: 15, heal: 40, cd: 3, lvl: 2 },
+                { id:'skill5', name: 'Forme d\'Ombre', dmg: 10, heal: 20, cd: 2, lvl: 3 },
+                { id:'skill6', name: 'Pluie de Plumes', dmg: 45, heal: 0, cd: 4, lvl: 3 },
+                { id:'ult', name: 'Étreinte Mortelle', dmg: 80, heal: -20, cd: 7, lvl: 4 }
             ]}
         };
 
@@ -119,39 +110,26 @@
             let limit = diff === 'facile' ? 2 : diff === 'normal' ? 4 : diff === 'difficile' ? 6 : 7;
             let filtered = charData[heroName].skills.filter(s => s.lvl <= limit);
             
-            // Cacher tous les boutons d'abord
             ['skill1','skill2','skill3','skill4','skill5','skill6','ult'].forEach(id => {
                 document.getElementById('s-'+id).style.display = 'none';
             });
             
-            // Afficher seulement les compétences filtrées
             filtered.forEach(s => {
                 let btn = document.getElementById('s-'+s.id);
-                btn.innerText = s.name;
+                btn.innerHTML = `<b>${s.name}</b><br>Dg: ${s.dmg} | Soin: ${s.heal}<br>CD: ${s.cd}`;
                 btn.style.display = 'block';
             });
-            return filtered;
         }
 
         function start(name) {
-            difficulty = localStorage.getItem('diff') || 'normal';
-            playerName = name;
-            let availableEnemies = heroes.filter(h => h !== playerName);
-            enemyName = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
-            
-            pMaxHP = pHP = charData[playerName].hp;
-            eMaxHP = eHP = charData[enemyName].hp;
-
-            pSkills = filterSkills(playerName, difficulty);
-            eSkills = filterSkills(enemyName, difficulty);
-
+            let diff = localStorage.getItem('diff') || 'normal';
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('battle-screen').style.display = 'block';
-            document.getElementById('p-name').innerText = playerName;
-            document.getElementById('e-name').innerText = enemyName;
+            document.getElementById('p-name').innerText = name;
+            filterSkills(name, diff);
         }
 
-        function play(id) { /* Logique de combat ici */ }
+        function play(id) { /* Logique de combat à compléter */ }
     </script>
 </body>
 </html>
