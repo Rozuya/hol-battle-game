@@ -49,12 +49,12 @@
 
     <script>
         const charData = {
-            "House of Laura": { role: "Équilibré", hp: 150, skills: [{name:'Hype', dmg: 20, heal: 0, cd: 0}, {name:'Pause Café', dmg: 0, heal: 30, cd: 2}, {name:'Raid', dmg: 40, heal: 0, cd: 2}, {name:'Soutien', dmg: 0, heal: 60, cd: 3}, {name:'Ban', dmg: 60, heal: 0, cd: 4}]},
-            "HOL Rozuya": { role: "Soutien / Soigneur", hp: 130, skills: [{name:'Code', dmg: 18, heal: 0, cd: 0}, {name:'Debug', dmg: 0, heal: 30, cd: 1}, {name:'Compile', dmg: 35, heal: 0, cd: 2}, {name:'Backup', dmg: 0, heal: 60, cd: 3}, {name:'Panic', dmg: 55, heal: 0, cd: 4}]},
-            "HOL Tony": { role: "Tank / Force", hp: 190, skills: [{name:'Poing', dmg: 20, heal: 0, cd: 0}, {name:'Boisson', dmg: 0, heal: 20, cd: 1}, {name:'Tacle', dmg: 35, heal: 0, cd: 2}, {name:'Souffle', dmg: 0, heal: 40, cd: 3}, {name:'Colosse', dmg: 70, heal: 0, cd: 5}]},
-            "HOL Omass": { role: "Offensif", hp: 160, skills: [{name:'Tir', dmg: 22, heal: 0, cd: 0}, {name:'Pansement', dmg: 0, heal: 15, cd: 1}, {name:'Perçant', dmg: 40, heal: 0, cd: 2}, {name:'Trousse', dmg: 0, heal: 40, cd: 3}, {name:'Aérien', dmg: 75, heal: 0, cd: 5}]},
-            "K974YT": { role: "Assassin / Burst", hp: 140, skills: [{name:'Clic', dmg: 25, heal: 0, cd: 0}, {name:'Manette', dmg: 0, heal: 20, cd: 1}, {name:'Critique', dmg: 45, heal: 0, cd: 2}, {name:'Zone', dmg: 0, heal: 30, cd: 3}, {name:'Explosion', dmg: 70, heal: 0, cd: 5}]},
-            "Dark MortelCygne": { role: "Vampire (Agressif)", hp: 125, skills: [{name:'Plume', dmg: 25, heal: 0, cd: 0}, {name:'Saignée', dmg: 35, heal: 0, cd: 1}, {name:'Griffes', dmg: 45, heal: 0, cd: 2}, {name:'Festin', dmg: 20, heal: 15, cd: 3}, {name:'Pluie', dmg: 60, heal: 0, cd: 4}, {name:'Étreinte', dmg: 90, heal: 0, cd: 6}]}
+            "House of Laura": { role: "Équilibré", hp: 200, skills: [{name:'Hype', dmg: 30, heal: 0, cd: 0}, {name:'Pause Café', dmg: 0, heal: 50, cd: 2}, {name:'Raid', dmg: 60, heal: 0, cd: 2}, {name:'Soutien', dmg: 0, heal: 80, cd: 3}, {name:'Ban', dmg: 90, heal: 0, cd: 4}]},
+            "HOL Rozuya": { role: "Soutien / Soigneur", hp: 180, skills: [{name:'Code', dmg: 25, heal: 0, cd: 0}, {name:'Debug', dmg: 0, heal: 50, cd: 1}, {name:'Compile', dmg: 50, heal: 0, cd: 2}, {name:'Backup', dmg: 0, heal: 90, cd: 3}, {name:'Panic', dmg: 80, heal: 0, cd: 4}]},
+            "HOL Tony": { role: "Tank / Force", hp: 250, skills: [{name:'Poing', dmg: 35, heal: 0, cd: 0}, {name:'Boisson', dmg: 0, heal: 40, cd: 1}, {name:'Tacle', dmg: 60, heal: 0, cd: 2}, {name:'Souffle', dmg: 0, heal: 70, cd: 3}, {name:'Colosse', dmg: 100, heal: 0, cd: 5}]},
+            "HOL Omass": { role: "Offensif", hp: 200, skills: [{name:'Tir', dmg: 40, heal: 0, cd: 0}, {name:'Pansement', dmg: 0, heal: 30, cd: 1}, {name:'Perçant', dmg: 70, heal: 0, cd: 2}, {name:'Trousse', dmg: 0, heal: 70, cd: 3}, {name:'Aérien', dmg: 110, heal: 0, cd: 5}]},
+            "K974YT": { role: "Assassin / Burst", hp: 170, skills: [{name:'Clic', dmg: 45, heal: 0, cd: 0}, {name:'Manette', dmg: 0, heal: 40, cd: 1}, {name:'Critique', dmg: 80, heal: 0, cd: 2}, {name:'Zone', dmg: 0, heal: 60, cd: 3}, {name:'Explosion', dmg: 120, heal: 0, cd: 5}]},
+            "Dark MortelCygne": { role: "Vampire (Agressif)", hp: 160, skills: [{name:'Plume', dmg: 40, heal: 0, cd: 0}, {name:'Saignée', dmg: 60, heal: 0, cd: 1}, {name:'Griffes', dmg: 80, heal: 0, cd: 2}, {name:'Festin', dmg: 40, heal: 40, cd: 3}, {name:'Pluie', dmg: 90, heal: 0, cd: 4}, {name:'Étreinte', dmg: 130, heal: 0, cd: 6}]}
         };
 
         let pName, eName, pHP, eHP, pMax, eMax, pSkills, eSkills, pCD, eCD, active = true;
@@ -63,27 +63,36 @@
             pName = name;
             let others = Object.keys(charData).filter(n => n !== name);
             eName = others[Math.floor(Math.random() * others.length)];
+            
             pMax = pHP = charData[pName].hp;
             eMax = eHP = charData[eName].hp;
-            pSkills = charData[pName].skills;
-            eSkills = charData[eName].skills;
+            
+            pSkills = JSON.parse(JSON.stringify(charData[pName].skills));
+            eSkills = JSON.parse(JSON.stringify(charData[eName].skills));
+            
             pCD = new Array(pSkills.length).fill(0);
             eCD = new Array(eSkills.length).fill(0);
+            
             document.getElementById('screen-select').style.display = 'none';
             document.getElementById('screen-battle').style.display = 'block';
             document.getElementById('p-name').innerText = pName;
             document.getElementById('e-name').innerText = eName;
+            
             updateUI();
         }
 
         function updateUI() {
-            document.getElementById('p-hp').innerText = `${pHP}/${pMax} PV`;
-            document.getElementById('e-hp').innerText = `${eHP}/${eMax} PV`;
-            document.getElementById('p-bar').style.width = (pHP/pMax)*100 + '%';
-            document.getElementById('e-bar').style.width = (eHP/eMax)*100 + '%';
+            // Mise à jour des textes
+            document.getElementById('p-hp').innerText = Math.round(pHP) + "/" + pMax + " PV";
+            document.getElementById('e-hp').innerText = Math.round(eHP) + "/" + eMax + " PV";
+            
+            // Mise à jour des barres
+            document.getElementById('p-bar').style.width = ((pHP / pMax) * 100) + "%";
+            document.getElementById('e-bar').style.width = ((eHP / eMax) * 100) + "%";
             
             const actions = document.getElementById('actions');
             actions.innerHTML = '';
+            
             pSkills.forEach((s, i) => {
                 let btn = document.createElement('button');
                 btn.className = 'skill';
@@ -99,31 +108,54 @@
         function play(i) {
             let s = pSkills[i];
             let msg = `${pName} utilise ${s.name}.`;
-            if(s.dmg > 0) msg += ` Il inflige ${s.dmg} dégâts.`;
-            if(s.heal > 0) msg += ` Il récupère ${s.heal} PV.`;
             
+            // Calcul dégâts / soin
+            if(s.dmg > 0) { eHP -= s.dmg; msg += ` Il inflige ${s.dmg} dégâts.`; }
+            if(s.heal > 0) { pHP = Math.min(pMax, pHP + s.heal); msg += ` Il récupère ${s.heal} PV.`; }
+            
+            // Sécurité pour ne pas dépasser 0
+            if(eHP < 0) eHP = 0;
+            if(pHP > pMax) pHP = pMax;
+            
+            // Gestion CD
             pCD[i] = s.cd;
-            pCD = pCD.map(x => Math.max(0, x - 1));
+            for(let j=0; j<pCD.length; j++) if(pCD[j] > 0) pCD[j]--;
+            
             document.getElementById('log').innerText = msg;
             updateUI();
-            if(eHP <= 0) endGame(true);
-            else setTimeout(enemyTurn, 1000);
+            
+            if(eHP <= 0) {
+                endGame(true);
+            } else {
+                // Désactive les boutons pendant le tour ennemi
+                active = false;
+                updateUI();
+                setTimeout(enemyTurn, 1000);
+            }
         }
 
         function enemyTurn() {
-            if(!active) return;
-            let i = eSkills.findIndex((s, idx) => eCD[idx] === 0);
-            if(i === -1) i = 0;
-            let s = eSkills[i];
-            let msg = `${eName} utilise ${s.name}.`;
-            if(s.dmg > 0) msg += ` Il inflige ${s.dmg} dégâts.`;
-            if(s.heal > 0) msg += ` Il récupère ${s.heal} PV.`;
-            
-            eCD[i] = s.cd;
-            eCD = eCD.map(x => Math.max(0, x - 1));
-            document.getElementById('log').innerText = msg;
-            updateUI();
-            if(pHP <= 0) endGame(false);
+            if(!active) {
+                let availableSkills = eSkills.filter((s, idx) => eCD[idx] === 0);
+                let s = availableSkills.length > 0 ? availableSkills[Math.floor(Math.random() * availableSkills.length)] : eSkills[0];
+                let i = eSkills.indexOf(s);
+                
+                let msg = `${eName} utilise ${s.name}.`;
+                if(s.dmg > 0) { pHP -= s.dmg; msg += ` Il inflige ${s.dmg} dégâts.`; }
+                if(s.heal > 0) { eHP = Math.min(eMax, eHP + s.heal); msg += ` Il récupère ${s.heal} PV.`; }
+                
+                if(pHP < 0) pHP = 0;
+                if(eHP > eMax) eHP = eMax;
+                
+                eCD[i] = s.cd;
+                for(let j=0; j<eCD.length; j++) if(eCD[j] > 0) eCD[j]--;
+                
+                document.getElementById('log').innerText = msg;
+                active = true;
+                updateUI();
+                
+                if(pHP <= 0) endGame(false);
+            }
         }
 
         function endGame(win) {
@@ -131,6 +163,7 @@
             document.getElementById('actions').style.display = 'none';
             document.getElementById('end-area').style.display = 'block';
             document.getElementById('end-title').innerText = win ? "Victoire" : "Défaite";
+            document.getElementById('log').innerText = win ? "Victoire !" : "Défaite...";
         }
 
         Object.entries(charData).forEach(([name, data]) => {
