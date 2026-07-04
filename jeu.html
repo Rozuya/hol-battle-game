@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
     <title>Combat HOL</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="container">
-        <div id="roster" class="roster"></div>
-        <div id="battle" style="display:none">
-            <div class="arena">
-                <div class="health-bar"><div id="p-bar" class="bar-fill"></div></div>
-                <div class="health-bar"><div id="e-bar" class="bar-fill" style="background:#ff4646"></div></div>
-            </div>
-            <div id="log" style="margin: 10px 0; color: #b3b3b3;">À toi de jouer !</div>
-            <div id="actions" class="roster"></div>
+        <h2 id="status">Combat en cours...</h2>
+        <div class="health-bar"><div id="p-bar" class="bar" style="width:100%"></div></div>
+        <div id="log" style="margin: 15px 0; font-weight: bold;">À toi de jouer !</div>
+        <div class="health-bar"><div id="e-bar" class="bar" style="width:100%; background:#ff4646"></div></div>
+        <div id="actions" class="roster"></div>
+    </div>
+
+    <!-- Pop-up Fin de jeu -->
+    <div id="endModal" class="modal">
+        <div class="modal-content">
+            <h2 id="resultText">Résultat</h2>
+            <button class="btn" onclick="location.href='index.html'">Accueil</button>
+            <button class="btn" onclick="location.href='personnage.html'">Rejouer</button>
         </div>
     </div>
 
     <script>
-        // Compétences triées par dégâts (d) croissants pour chaque héros
         const chars = {
             "House of Laura": {hp:260, skills:[{n:'Pause',d:10},{n:'Soutien',d:20},{n:'Hype',d:40},{n:'Combo',d:50},{n:'Raid',d:60},{n:'Ban',d:80},{n:'Mega',d:90}]},
             "HOL Rozuya": {hp:230, skills:[{n:'Code',d:20},{n:'Soin',d:25},{n:'Debug',d:30},{n:'Compile',d:30},{n:'Backup',d:40},{n:'Panic',d:50},{n:'Flash',d:60}]},
@@ -30,65 +35,60 @@
             "Dark MortelCygne": {hp:220, skills:[{n:'Ombre',d:25},{n:'Plume',d:30},{n:'Griffe',d:40},{n:'Night',d:50},{n:'Black',d:60},{n:'Étreinte',d:80},{n:'Soul',d:90}]}
         };
 
-        let pName, eName, pHP, eHP, pMax, eMax, pS, eS, isPlayerTurn = true;
-        let diff = parseInt(localStorage.getItem('diff')) || 4;
-
-        Object.keys(chars).forEach(n => {
-            let b = document.createElement('button'); b.className = 'btn'; b.innerText = n;
-            b.onclick = () => start(n); document.getElementById('roster').appendChild(b);
-        });
-
-        function start(n) {
-            pName = n;
-            let ops = Object.keys(chars).filter(x => x !== n);
-            eName = ops[Math.floor(Math.random() * ops.length)];
-            pHP = pMax = chars[pName].hp;
-            eHP = eMax = chars[eName].hp;
-            // Limite le nombre de compétences selon la difficulté (2, 4, 6, 7)
-            pS = chars[pName].skills.slice(0, diff);
-            eS = chars[eName].skills.slice(0, diff);
-            document.getElementById('roster').style.display = 'none';
-            document.getElementById('battle').style.display = 'block';
-            updateUI();
-        }
-
-        function getAISkill() {
-            // Logique fixe selon la difficulté
-            let sorted = [...eS].sort((a,b) => a.d - b.d);
-            if(diff == 2) return sorted[0];           // Toujours la plus faible
-            if(diff == 4) return sorted[1];           // 2ème plus faible
-            if(diff == 6) return sorted[sorted.length-2]; // 2ème plus forte
-            return sorted[sorted.length-1];           // Toujours la plus forte
-        }
+        const pName = localStorage.getItem('char') || "House of Laura";
+        const diff = parseInt(localStorage.getItem('diff')) || 4;
+        
+        // Sélection aléatoire de l'adversaire
+        const charNames = Object.keys(chars);
+        const eName = charNames.filter(n => n !== pName)[Math.floor(Math.random() * (charNames.length - 1))];
+        
+        let pHP = chars[pName].hp, eHP = chars[eName].hp;
+        let pMax = pHP, eMax = eHP;
+        let pS = chars[pName].skills.slice(0, diff);
+        let eS = chars[eName].skills.slice(0, diff);
+        let isPlayerTurn = true;
 
         function updateUI() {
-            document.getElementById('p-bar').style.width = (pHP/pMax*100) + "%";
-            document.getElementById('e-bar').style.width = (eHP/eMax*100) + "%";
-            let act = document.getElementById('actions'); act.innerHTML = '';
-            if(isPlayerTurn) {
-                pS.forEach((s, i) => {
-                    let b = document.createElement('button'); b.className = 'btn'; b.innerText = s.n;
-                    b.onclick = () => play(i); act.appendChild(b);
-                });
-            }
+            document.getElementById('p-bar').style.width = (pHP / pMax * 100) + "%";
+            document.getElementById('e-bar').style.width = (eHP / eMax * 100) + "%";
         }
 
         function play(i) {
             if(!isPlayerTurn) return;
             eHP = Math.max(0, eHP - pS[i].d);
-            isPlayerTurn = false;
+            document.getElementById('log').innerText = `Tu as utilisé ${pS[i].n}`;
             updateUI();
-            if(eHP > 0) {
-                setTimeout(() => {
-                    let s = getAISkill();
-                    pHP = Math.max(0, pHP - s.d);
-                    isPlayerTurn = true;
-                    document.getElementById('log').innerText = `L'IA a utilisé ${s.n}`;
-                    updateUI();
-                    if(pHP <= 0) { alert("Défaite !"); location.reload(); }
-                }, 1000);
-            } else { alert("Victoire !"); location.reload(); }
+            
+            if(eHP <= 0) endGame("Victoire !");
+            else {
+                isPlayerTurn = false;
+                setTimeout(aiTurn, 1000);
+            }
         }
+
+        function aiTurn() {
+            let sorted = [...eS].sort((a,b) => a.d - b.d);
+            let s = (diff==2) ? sorted[0] : (diff==4) ? sorted[1] : (diff==6) ? sorted[sorted.length-2] : sorted[sorted.length-1];
+            pHP = Math.max(0, pHP - s.d);
+            document.getElementById('log').innerText = `L'IA a utilisé ${s.n}`;
+            updateUI();
+            
+            if(pHP <= 0) endGame("Défaite...");
+            else isPlayerTurn = true;
+        }
+
+        function endGame(msg) {
+            document.getElementById('resultText').innerText = msg;
+            document.getElementById('endModal').style.display = 'flex';
+        }
+
+        pS.forEach((s, i) => {
+            let b = document.createElement('button');
+            b.className = 'btn';
+            b.innerHTML = `${s.n}<br><small>${s.d} dégâts</small>`;
+            b.onclick = () => play(i);
+            document.getElementById('actions').appendChild(b);
+        });
     </script>
 </body>
 </html>
