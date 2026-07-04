@@ -26,15 +26,19 @@
                 <p id="e-hp">150/150</p>
             </div>
         </div>
-        <div id="log"></div>
+        
+        <div id="log" style="text-align: center; min-height: 25px; margin-bottom: 15px; font-weight: bold; color: #9146ff; font-size: 1.1rem;">
+            Que le combat commence !
+        </div>
+
         <div class="action-grid" id="actions">
-            <button class="skill" id="s-basic" onclick="play('basic')"><strong>Attaque</strong><small>15 Dmg (0 CD)</small></button>
-            <button class="skill" id="s-heal" onclick="play('heal')"><strong>Soin</strong><small>+20 PV (2 CD)</small></button>
-            <button class="skill" id="s-brise" onclick="play('brise')"><strong>Brise Armure</strong><small>25 Dmg (2 CD)</small></button>
-            <button class="skill" id="s-bigHeal" onclick="play('bigHeal')"><strong>Gros Soin</strong><small>+50 PV (3 CD)</small></button>
-            <button class="skill" id="s-stun" onclick="play('stun')"><strong>Ban Chat</strong><small>Neutralise (4 CD)</small></button>
-            <button class="skill" id="s-toxic" onclick="play('toxic')"><strong>Toxicité</strong><small>Poison (4 CD)</small></button>
-            <button class="skill" id="s-ulti" onclick="play('ulti')"><strong>ULTI</strong><small>40 Dmg (6 CD)</small></button>
+            <button class="skill" id="s-basic" onclick="play('basic')"></button>
+            <button class="skill" id="s-heal" onclick="play('heal')"></button>
+            <button class="skill" id="s-brise" onclick="play('brise')"></button>
+            <button class="skill" id="s-bigHeal" onclick="play('bigHeal')"></button>
+            <button class="skill" id="s-stun" onclick="play('stun')"></button>
+            <button class="skill" id="s-toxic" onclick="play('toxic')"></button>
+            <button class="skill" id="s-ulti" onclick="play('ulti')"></button>
         </div>
     </div>
 
@@ -47,63 +51,155 @@
     <script>
         const diff = localStorage.getItem('diff') || 'normal';
         let pHP=150, eHP=150, active=true;
+        let playerName = "";
+        let enemyName = "";
         
-        const skillConfig = {
-            'basic': { dmg: 15, heal: 0, cd: 0, current: 0, desc: '15 Dmg (0 CD)' },
-            'heal': { dmg: 0, heal: 20, cd: 2, current: 0, desc: '+20 PV (2 CD)' },
-            'brise': { dmg: 25, heal: 0, cd: 2, current: 0, desc: '25 Dmg (2 CD)' },
-            'bigHeal': { dmg: 0, heal: 50, cd: 3, current: 0, desc: '+50 PV (3 CD)' },
-            'stun': { dmg: 10, heal: 0, cd: 4, current: 0, desc: 'Neutralise (4 CD)' },
-            'toxic': { dmg: 15, heal: 0, cd: 4, current: 0, desc: 'Poison (4 CD)' },
-            'ulti': { dmg: 40, heal: 0, cd: 6, current: 0, desc: '40 Dmg (6 CD)' }
+        // Base de données des personnages
+        const charData = {
+            "House of Laura": {
+                'basic': { name: 'Hype du Chat', dmg: 15, heal: 0, cd: 0 },
+                'heal': { name: 'Pause Café', dmg: 0, heal: 20, cd: 2 },
+                'brise': { name: 'Raid Massif', dmg: 25, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Soutien des Subs', dmg: 0, heal: 50, cd: 3 },
+                'stun': { name: 'Bannissement', dmg: 10, heal: 0, cd: 4 },
+                'toxic': { name: 'Drama', dmg: 15, heal: 0, cd: 4 },
+                'ulti': { name: 'Fin de Live !', dmg: 40, heal: 0, cd: 6 }
+            },
+            "HOL Rozuya": {
+                'basic': { name: 'Ligne de Code', dmg: 15, heal: 0, cd: 0 },
+                'heal': { name: 'Corriger Bug', dmg: 0, heal: 20, cd: 2 },
+                'brise': { name: 'Compilation', dmg: 25, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Backup Serveur', dmg: 0, heal: 50, cd: 3 },
+                'stun': { name: 'Écran Bleu', dmg: 10, heal: 0, cd: 4 },
+                'toxic': { name: 'Faille Critique', dmg: 15, heal: 0, cd: 4 },
+                'ulti': { name: 'Grosse Mise à Jour', dmg: 40, heal: 0, cd: 6 }
+            },
+            "HOL Tony": {
+                'basic': { name: 'Coup de Poing', dmg: 15, heal: 0, cd: 0 },
+                'heal': { name: 'Boisson Énergie', dmg: 0, heal: 20, cd: 2 },
+                'brise': { name: 'Tacle Glissé', dmg: 25, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Second Souffle', dmg: 0, heal: 50, cd: 3 },
+                'stun': { name: 'Coup Bas', dmg: 10, heal: 0, cd: 4 },
+                'toxic': { name: 'Provocation', dmg: 15, heal: 0, cd: 4 },
+                'ulti': { name: 'Combo Furieux', dmg: 40, heal: 0, cd: 6 }
+            },
+            "HOL Omass": {
+                'basic': { name: 'Tir Précis', dmg: 15, heal: 0, cd: 0 },
+                'heal': { name: 'Pansement', dmg: 0, heal: 20, cd: 2 },
+                'brise': { name: 'Balle Perçante', dmg: 25, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Trousse de Soin', dmg: 0, heal: 50, cd: 3 },
+                'stun': { name: 'Grenade Flash', dmg: 10, heal: 0, cd: 4 },
+                'toxic': { name: 'Gaz Toxique', dmg: 15, heal: 0, cd: 4 },
+                'ulti': { name: 'Frappe Orbitale', dmg: 40, heal: 0, cd: 6 }
+            },
+            "K974YT": {
+                'basic': { name: 'Clic Droit', dmg: 15, heal: 0, cd: 0 },
+                'heal': { name: 'Soin Manette', dmg: 0, heal: 20, cd: 2 },
+                'brise': { name: 'Coup Critique', dmg: 25, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Heal de Zone', dmg: 0, heal: 50, cd: 3 },
+                'stun': { name: 'Gros Lagg', dmg: 10, heal: 0, cd: 4 },
+                'toxic': { name: 'Commu Ranked', dmg: 15, heal: 0, cd: 4 },
+                'ulti': { name: 'Gros Tryhard', dmg: 40, heal: 0, cd: 6 }
+            },
+            "Dark MortelCygne": {
+                'basic': { name: 'Plume Noire', dmg: 15, heal: 0, cd: 0 },
+                'heal': { name: 'Vol de Vie', dmg: 0, heal: 20, cd: 2 },
+                'brise': { name: 'Frappe Obscure', dmg: 25, heal: 0, cd: 2 },
+                'bigHeal': { name: 'Aura Ténébreuse', dmg: 0, heal: 50, cd: 3 },
+                'stun': { name: 'Peur Bleue', dmg: 10, heal: 0, cd: 4 },
+                'toxic': { name: 'Poison Obscur', dmg: 15, heal: 0, cd: 4 },
+                'ulti': { name: 'Éclipse Totale', dmg: 40, heal: 0, cd: 6 }
+            }
         };
 
-        const heroes = ["House of Laura", "HOL Tony", "HOL Rozuya", "HOL Omass", "K974YT", "Dark MortelCygne"];
+        // On sépare totalement le cerveau du joueur et de l'IA
+        let pSkills = {}; // Compétences du Joueur
+        let eSkills = {}; // Compétences de l'Ennemi
+
+        const heroes = Object.keys(charData);
         
-        // Init Roster
         heroes.forEach(n => {
             let d = document.createElement('div'); d.className='character-card'; d.innerText=n;
             d.onclick = () => start(n); document.getElementById('roster').appendChild(d);
         });
 
+        // Fonction pour savoir quelles compétences sont autorisées selon la difficulté
+        function isSkillAllowed(k) {
+            if(diff === 'facile') return k === 'basic' || k === 'heal'; // 2 comp
+            if(diff === 'normal') return ['basic','heal','brise','bigHeal'].includes(k); // 4 comp
+            if(diff === 'difficile') return ['basic','heal','brise','bigHeal','stun','toxic'].includes(k); // 6 comp
+            return true; // expert: 7 comp
+        }
+
         function start(name) {
+            playerName = name;
+            // L'IA choisit un personnage au hasard
+            enemyName = heroes[Math.floor(Math.random() * heroes.length)];
+
             document.getElementById('selection-screen').style.display = 'none';
             document.getElementById('battle-screen').style.display = 'block';
-            document.getElementById('p-name').innerText = name;
-            document.getElementById('e-name').innerText = "IA (" + diff + ")";
+            document.getElementById('p-name').innerText = playerName;
+            document.getElementById('e-name').innerText = enemyName + " (" + diff + ")";
             
-            // Masquage dynamique
-            const list = ['brise','bigHeal','stun','toxic','ulti'];
-            list.forEach(s => { let btn = document.getElementById('s-'+s); if(btn) btn.style.display = 'none'; });
-            if(diff !== 'facile') { document.getElementById('s-brise').style.display = 'flex'; document.getElementById('s-bigHeal').style.display = 'flex'; }
-            if(diff === 'difficile' || diff === 'expert') { document.getElementById('s-stun').style.display = 'flex'; document.getElementById('s-toxic').style.display = 'flex'; }
-            if(diff === 'expert') { document.getElementById('s-ulti').style.display = 'flex'; }
+            const myHero = charData[playerName];
+            const aiHero = charData[enemyName];
+
+            // Charger les compétences du Joueur ET de l'IA
+            for(let k in myHero) {
+                let descText = myHero[k].heal > 0 ? "+" + myHero[k].heal + " PV" : myHero[k].dmg + " Dmg";
+                descText += " (" + myHero[k].cd + " CD)";
+
+                pSkills[k] = { name: myHero[k].name, dmg: myHero[k].dmg, heal: myHero[k].heal, cd: myHero[k].cd, cdCurrent: 0, desc: descText };
+                eSkills[k] = { name: aiHero[k].name, dmg: aiHero[k].dmg, heal: aiHero[k].heal, cd: aiHero[k].cd, cdCurrent: 0 };
+
+                let btn = document.getElementById('s-' + k);
+                if(btn) {
+                    btn.innerHTML = '<strong>' + myHero[k].name + '</strong><small>' + descText + '</small>';
+                    if(!isSkillAllowed(k)) btn.style.display = 'none'; // Masquer selon la difficulté
+                }
+            }
+        }
+
+        function logCombat(actor, skillName) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerText = actor + " utilise " + skillName + " !";
+            // L'IA s'affiche en rouge clair, le joueur en violet
+            logDiv.style.color = actor === playerName ? "#9146ff" : "#ff4d4d"; 
         }
 
         function play(action) {
             if(!active) return;
             executeMove(action, true);
-            if(eHP > 0) { active = false; setTimeout(iaTurn, 1000); }
+            if(eHP > 0) { active = false; setTimeout(iaTurn, 1200); } // Petite pause pour lire le journal
         }
 
         function executeMove(action, isPlayer) {
-            let s = skillConfig[action];
-            if(isPlayer) { eHP = Math.max(0, eHP - s.dmg); pHP = Math.min(150, pHP + s.heal); }
-            else { pHP = Math.max(0, pHP - s.dmg); eHP = Math.min(150, eHP + s.heal); }
+            if(isPlayer) { 
+                let s = pSkills[action];
+                eHP = Math.max(0, eHP - s.dmg); 
+                pHP = Math.min(150, pHP + s.heal); 
+                s.cdCurrent = s.cd; 
+                logCombat(playerName, s.name);
+            } else { 
+                let s = eSkills[action];
+                pHP = Math.max(0, pHP - s.dmg); 
+                eHP = Math.min(150, eHP + s.heal); 
+                s.cdCurrent = s.cd;
+                logCombat(enemyName, s.name);
+            }
             
-            s.current = s.cd;
             updateUI();
             if(pHP <= 0 || eHP <= 0) endGame(eHP <= 0);
         }
 
         function iaTurn() {
-            let validMoves = Object.keys(skillConfig).filter(k => 
-                skillConfig[k].current === 0 && 
-                (document.getElementById('s-'+k) && document.getElementById('s-'+k).style.display !== 'none' || k === 'basic' || k === 'heal')
+            // L'IA regarde SES compétences autorisées et sans cooldown
+            let validMoves = Object.keys(eSkills).filter(k => 
+                eSkills[k].cdCurrent === 0 && isSkillAllowed(k)
             );
 
             let move = "basic";
-            // IA intelligente
+            
             if(diff === 'facile') {
                 move = validMoves[Math.floor(Math.random() * validMoves.length)];
             } else if(diff === 'normal') {
@@ -119,9 +215,13 @@
             }
 
             executeMove(move, false);
-            for(let k in skillConfig) if(skillConfig[k].current > 0) skillConfig[k].current--;
+            
+            // On descend les temps de recharge pour tout le monde à la fin du tour
+            for(let k in pSkills) { if(pSkills[k].cdCurrent > 0) pSkills[k].cdCurrent--; }
+            for(let k in eSkills) { if(eSkills[k].cdCurrent > 0) eSkills[k].cdCurrent--; }
+            
             active = true;
-            updateUI();
+            updateUI(); 
         }
 
         function updateUI() {
@@ -130,16 +230,17 @@
             document.getElementById('p-bar').style.width = (pHP/150*100) + "%";
             document.getElementById('e-bar').style.width = (eHP/150*100) + "%";
             
-            for(let k in skillConfig) {
+            // On met à jour uniquement les boutons du joueur
+            for(let k in pSkills) {
                 let btn = document.getElementById('s-' + k);
                 if(btn) {
                     let small = btn.querySelector('small');
-                    if(skillConfig[k].current > 0) {
+                    if(pSkills[k].cdCurrent > 0) {
                         btn.disabled = true;
-                        small.innerText = "Recharge: " + skillConfig[k].current;
+                        small.innerText = "Recharge: " + pSkills[k].cdCurrent;
                     } else {
                         btn.disabled = false;
-                        small.innerText = skillConfig[k].desc;
+                        small.innerText = pSkills[k].desc;
                     }
                 }
             }
