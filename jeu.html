@@ -14,17 +14,18 @@
         .health-bar { height: 22px; background: #333; border-radius: 10px; overflow: hidden; border: 1px solid #444; }
         .bar { height: 100%; background: #9146ff; width: 100%; transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         .hp-text { font-size: 0.85rem; margin-top: 6px; color: #ccc; }
-        .shaking { animation: shake 0.4s; background: #ff4646 !important; }
-        @keyframes shake { 0%, 100% {transform: translateX(0)} 25% {transform: translateX(-5px)} 75% {transform: translateX(5px)} }
+        
         #log { text-align: center; font-size: 1.1rem; color: #9146ff; min-height: 28px; margin: 15px 0; }
         #actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
+        
         .btn { padding: 15px 10px; background: #2a2a2a; border: 1px solid #444; color: white; cursor: pointer; border-radius: 10px; transition: 0.2s; font-size: 0.95rem; user-select: none; -webkit-tap-highlight-color: transparent; }
         .btn:hover:not(:disabled) { background: #3a3a3a; border-color: #9146ff; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; border: 1px solid #555; background: #1a1a1a; }
-        /* Style spécial pour le texte de CD */
+        
         .cd-text { display: block; margin-top: 4px; font-size: 0.8rem; font-weight: bold; }
         .ready { color: #4caf50; }
         .waiting { color: #ff9800; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 100; }
         .modal-box { background: #1e1e1e; padding: 30px; border-radius: 15px; border: 2px solid #9146ff; text-align: center; width: 90%; max-width: 400px; }
         .modal-btns { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
@@ -51,7 +52,7 @@
             </div>
             <div class="player-status">
                 <div id="e-name" class="char-name"></div>
-                <div class="health-bar"><div id="e-bar" class="bar" style="background: #ff4646;"></div></div>
+                <div class="health-bar"><div id="e-bar" class="bar"></div></div>
                 <div id="e-hp" class="hp-text"></div>
             </div>
         </div>
@@ -98,10 +99,7 @@
                 let b = document.createElement('button');
                 b.className = 'btn';
                 b.disabled = !isPlayerTurn || s.cdActuel > 0;
-                
-                // Nouveau formatage : Valeur + Statut CD explicite
                 let cdLabel = s.cdActuel > 0 ? `<span class="cd-text waiting">CD: ${s.cdActuel}</span>` : `<span class="cd-text ready">PRÊT</span>`;
-                
                 b.innerHTML = `<strong>${s.n}</strong><br><small>${s.t=='dmg'?s.v+' dmg':s.v+' heal'}</small>${cdLabel}`;
                 b.onclick = () => playerMove(i);
                 container.appendChild(b);
@@ -110,7 +108,7 @@
 
         function playerMove(i) {
             let s = pS[i];
-            if(s.t === 'dmg') { eHP -= s.v; document.getElementById('e-bar').classList.add('shaking'); setTimeout(()=>document.getElementById('e-bar').classList.remove('shaking'), 400); }
+            if(s.t === 'dmg') { eHP -= s.v; }
             else { pHP = Math.min(chars[pName].hp, pHP + s.v); }
             s.cdActuel = s.cd + 1;
             document.getElementById('log').innerText = `Tu as utilisé ${s.n} !`;
@@ -132,7 +130,7 @@
             else move = av[Math.floor(Math.random() * av.length)]; 
 
             if(move) {
-                if(move.t === 'dmg') { pHP -= move.v; document.getElementById('p-bar').classList.add('shaking'); setTimeout(()=>document.getElementById('p-bar').classList.remove('shaking'), 400); }
+                if(move.t === 'dmg') { pHP -= move.v; }
                 else { eHP = Math.min(chars[eName].hp, eHP + move.v); }
                 move.cdActuel = move.cd + 1;
                 document.getElementById('log').innerText = `${eName} utilise ${move.n} !`;
