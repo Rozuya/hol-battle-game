@@ -10,16 +10,16 @@
 
     <div class="container">
         <h1>Choisis ta difficulté</h1>
-        <button class="btn" onclick="setDiff(2)">Facile (2 Compétences)</button>
-        <button class="btn" onclick="setDiff(4)">Normal (4 Compétences)</button>
-        <button class="btn" onclick="setDiff(6)">Difficile (6 Compétences)</button>
-        <button class="btn" onclick="setDiff(7)">Expert (7 Compétences)</button>
+        <button class="btn" onclick="setDiff(1)">Facile (2 Compétences)</button>
+        <button class="btn" onclick="setDiff(2)">Normal (4 Compétences)</button>
+        <button class="btn" onclick="setDiff(3)">Difficile (6 Compétences)</button>
+        <button class="btn" onclick="setDiff(4)">Expert (7 Compétences)</button>
     </div>
 
     <script>
         function setDiff(val) {
             localStorage.setItem('diff', val);
-            location.href = 'personnage.html';
+            location.href = 'personnage.html'; 
         }
     </script>
 </body>
