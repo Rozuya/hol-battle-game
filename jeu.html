@@ -14,7 +14,7 @@
         .bar { height: 100%; background: #9146ff; width: 100%; transition: width 0.3s; }
         #actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .btn { padding: 15px; background: #2a2a2a; border: 1px solid #444; color: white; cursor: pointer; border-radius: 10px; }
-        .btn:disabled { opacity: 0.5; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; }
     </style>
 </head>
@@ -39,19 +39,25 @@
     </div>
 
     <script>
+        // EQUILIBRAGE GLOBAL ACCESSIBLE POUR TOUS LES PERSOS
         const chars = {
-            "House of Laura": {hp: 200, skills: [{n:'Chat Spam',v:20,t:'dmg',cd:0}, {n:'BRB',v:30,t:'heal',cd:0}, {n:'Sub Gift',v:40,t:'heal',cd:1}, {n:'Host Raid',v:45,t:'dmg',cd:2}, {n:'Donation',v:65,t:'dmg',cd:2}, {n:'Stream Event',v:90,t:'dmg',cd:3}, {n:'Partner Prime',v:120,t:'dmg',cd:5}]},
-            "HOL Rozuya": {hp: 170, skills: [{n:'Code',v:25,t:'dmg',cd:0}, {n:'Soin',v:30,t:'heal',cd:0}, {n:'Debug',v:35,t:'dmg',cd:1}, {n:'Panic',v:55,t:'dmg',cd:1}, {n:'Backup',v:60,t:'heal',cd:2}, {n:'Flash',v:75,t:'dmg',cd:3}, {n:'System',v:110,t:'dmg',cd:5}]},
-            "HOL Tony": {hp: 250, skills: [{n:'Bloc',v:15,t:'dmg',cd:0}, {n:'Cri',v:20,t:'dmg',cd:0}, {n:'Soin',v:35,t:'heal',cd:1}, {n:'Rush',v:40,t:'dmg',cd:1}, {n:'Charge',v:50,t:'dmg',cd:2}, {n:'Impact',v:70,t:'dmg',cd:3}, {n:'Mur',v:110,t:'dmg',cd:6}]},
-            "HOL Omass": {hp: 190, skills: [{n:'Rush',v:22,t:'dmg',cd:0}, {n:'Flex',v:20,t:'heal',cd:0}, {n:'Punch',v:35,t:'dmg',cd:1}, {n:'Slam',v:45,t:'dmg',cd:1}, {n:'Combo',v:55,t:'dmg',cd:2}, {n:'Uppercut',v:75,t:'dmg',cd:3}, {n:'Fury',v:105,t:'dmg',cd:4}]},
+            "House of Laura": {hp: 210, skills: [{n:'Chat Spam',v:25,t:'dmg',cd:0}, {n:'BRB',v:40,t:'heal',cd:0}, {n:'Sub Gift',v:45,t:'heal',cd:1}, {n:'Host Raid',v:50,t:'dmg',cd:2}, {n:'Donation',v:65,t:'dmg',cd:2}, {n:'Stream Event',v:90,t:'dmg',cd:3}, {n:'Partner Prime',v:125,t:'dmg',cd:5}]},
+            "HOL Rozuya": {hp: 200, skills: [{n:'Code',v:16,t:'dmg',cd:0}, {n:'Soin',v:45,t:'heal',cd:0}, {n:'Debug',v:35,t:'dmg',cd:1}, {n:'Panic',v:55,t:'dmg',cd:1}, {n:'Backup',v:75,t:'heal',cd:2}, {n:'Flash',v:80,t:'dmg',cd:3}, {n:'System',v:125,t:'dmg',cd:5}]},
+            "HOL Tony": {hp: 260, skills: [{n:'Bloc',v:12,t:'dmg',cd:0}, {n:'Cri',v:16,t:'dmg',cd:0}, {n:'Soin',v:35,t:'heal',cd:2}, {n:'Rush',v:30,t:'dmg',cd:1}, {n:'Charge',v:45,t:'dmg',cd:3}, {n:'Impact',v:60,t:'dmg',cd:4}, {n:'Mur',v:80,t:'dmg',cd:6}]},
+            "HOL Omass": {hp: 175, skills: [{n:'Rush',v:24,t:'dmg',cd:0}, {n:'Flex',v:20,t:'heal',cd:0}, {n:'Punch',v:38,t:'dmg',cd:1}, {n:'Slam',v:48,t:'dmg',cd:1}, {n:'Combo',v:60,t:'dmg',cd:2}, {n:'Uppercut',v:85,t:'dmg',cd:3}, {n:'Fury',v:120,t:'dmg',cd:4}]},
             "K974YT": {hp: 160, skills: [{n:'Jump',v:18,t:'dmg',cd:0}, {n:'Dash',v:30,t:'dmg',cd:0}, {n:'Silent',v:45,t:'dmg',cd:1}, {n:'Cut',v:40,t:'heal',cd:1}, {n:'Slash',v:65,t:'dmg',cd:2}, {n:'Blade',v:90,t:'dmg',cd:3}, {n:'Backstab',v:130,t:'dmg',cd:5}]},
-            "Dark MortelCygne": {hp: 190, skills: [{n:'Ombre',v:20,t:'dmg',cd:0}, {n:'Vampire',v:40,t:'heal',cd:0}, {n:'Griffe',v:45,t:'dmg',cd:1}, {n:'Night',v:50,t:'dmg',cd:1}, {n:'Black',v:60,t:'dmg',cd:2}, {n:'Étreinte',v:75,t:'dmg',cd:3}, {n:'Soul',v:100,t:'dmg',cd:5}]}
+            "Dark MortelCygne": {hp: 205, skills: [{n:'Ombre',v:20,t:'dmg',cd:0}, {n:'Vampire',v:35,t:'heal',cd:1}, {n:'Griffe',v:45,t:'dmg',cd:1}, {n:'Night',v:50,t:'dmg',cd:1}, {n:'Black',v:65,t:'dmg',cd:2}, {n:'Étreinte',v:80,t:'dmg',cd:3}, {n:'Soul',v:115,t:'dmg',cd:5}]}
         };
 
         let pName = localStorage.getItem('char') || "House of Laura";
-        let diff = parseInt(localStorage.getItem('diff')) || 1;
+        let diff = parseInt(localStorage.getItem('diff')) || 1; 
         let numSkills = [2, 4, 6, 7][diff - 1] || 2;
         
+        // CORRECTION DE L'IA : Multiplicateurs dosés pour garder l'Expert gagnable
+        let enemyHpMultiplier = [1.0, 1.15, 1.30, 1.45][diff - 1] || 1.0;
+        let enemyAtkMultiplier = [1.0, 1.10, 1.20, 1.35][diff - 1] || 1.0;
+        
+        // MECANIQUE ANTI-CLONE : Filtrage strict pour ne jamais tomber sur soi-même
         const allNames = Object.keys(chars);
         const possibleEnemies = allNames.filter(n => n !== pName);
         let eName = possibleEnemies[Math.floor(Math.random() * possibleEnemies.length)];
@@ -59,8 +65,12 @@
         let pS = chars[pName].skills.slice(0, numSkills).map(s => ({...s, cdActuel: 0}));
         let eS = chars[eName].skills.slice(0, numSkills).map(s => ({...s, cdActuel: 0}));
         
-        let pHP = chars[pName].hp, eHP = chars[eName].hp;
+        let pHP = chars[pName].hp;
+        let eMaxHP = Math.round(chars[eName].hp * enemyHpMultiplier);
+        let eHP = eMaxHP;
+        
         let isPlayerTurn = true;
+        let actionEnCours = false; // Le fameux verrou anti double-clic
 
         function updateTurnText(text) { document.getElementById('turn-text').innerText = text; }
 
@@ -68,48 +78,78 @@
             document.getElementById('p-name').innerText = pName;
             document.getElementById('e-name').innerText = eName;
             document.getElementById('p-hp').innerText = `${Math.max(0, pHP)} / ${chars[pName].hp}`;
-            document.getElementById('e-hp').innerText = `${Math.max(0, eHP)} / ${chars[eName].hp}`;
+            document.getElementById('e-hp').innerText = `${Math.max(0, eHP)} / ${eMaxHP}`;
             document.getElementById('p-bar').style.width = (Math.max(0, pHP)/chars[pName].hp*100) + "%";
-            document.getElementById('e-bar').style.width = (Math.max(0, eHP)/chars[eName].hp*100) + "%";
+            document.getElementById('e-bar').style.width = (Math.max(0, eHP)/eMaxHP*100) + "%";
             
-            if(isPlayerTurn) updateTurnText(`À ${pName} de jouer !`);
+            if(isPlayerTurn && !actionEnCours) updateTurnText(`À ${pName} de jouer !`);
             
             const container = document.getElementById('actions');
             container.innerHTML = '';
             pS.forEach((s, i) => {
                 let b = document.createElement('button');
                 b.className = 'btn';
-                b.disabled = !isPlayerTurn || s.cdActuel > 0;
-                b.innerHTML = `<strong>${s.n}</strong><br>${s.v} ${s.t}<br>${s.cdActuel>0 ? 'CD:'+s.cdActuel : 'PRÊT'}`;
+                b.disabled = !isPlayerTurn || actionEnCours || s.cdActuel > 0;
+                b.innerHTML = `<strong>${s.n}</strong><br>${s.v} ${s.t}<br>${s.cdActuel>0 ? 'CD : '+s.cdActuel : 'PRÊT'}`;
                 b.onclick = () => {
+                    if(!isPlayerTurn || actionEnCours || s.cdActuel > 0) return;
+                    actionEnCours = true; // On verrouille l'action immédiatement
+                    
+                    const allBtns = container.querySelectorAll('.btn');
+                    allBtns.forEach(btn => btn.disabled = true);
+
                     updateTurnText(`${pName} utilise ${s.n} !`);
                     if(s.t==='dmg') eHP -= s.v; else pHP = Math.min(chars[pName].hp, pHP + s.v);
-                    s.cdActuel = s.cd; isPlayerTurn = false;
-                    setTimeout(() => { updateUI(); if(eHP <= 0) endGame(true); else aiTurn(); }, 1200);
+                    s.cdActuel = s.cd + 1; 
+                    isPlayerTurn = false;
+                    
+                    setTimeout(() => { 
+                        updateUI(); 
+                        if(eHP <= 0) endGame(true); else aiTurn(); 
+                    }, 1200);
                 };
                 container.appendChild(b);
             });
         }
 
         function aiTurn() {
-            pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
-            eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
             let moves = eS.filter(s => s.cdActuel === 0);
             let move = null;
             if (moves.length > 0) {
-                if (diff === 1) { move = moves[Math.floor(Math.random() * moves.length)]; }
-                else if (diff === 2) { let heal = moves.find(s => s.t === 'heal'); move = (eHP < (chars[eName].hp * 0.5) && heal) ? heal : moves.sort((a,b) => b.v - a.v)[0]; }
-                else { move = moves.sort((a,b) => b.v - a.v)[0]; }
+                if (diff === 1) { 
+                    move = moves[Math.floor(Math.random() * moves.length)]; 
+                } else { 
+                    let heal = moves.find(s => s.t === 'heal'); 
+                    move = (eHP < (eMaxHP * 0.4) && heal) ? heal : moves.sort((a,b) => b.v - a.v)[0]; 
+                }
             }
             if(move) {
                 updateTurnText(`${eName} utilise ${move.n} !`);
                 setTimeout(() => {
-                    if(move.t === 'dmg') pHP -= move.v; else eHP = Math.min(chars[eName].hp, eHP + move.v);
-                    move.cdActuel = move.cd;
-                    isPlayerTurn = true; updateUI();
+                    if(move.t === 'dmg') {
+                        let finalDmg = Math.round(move.v * enemyAtkMultiplier);
+                        pHP -= finalDmg;
+                    } else { 
+                        eHP = Math.min(eMaxHP, eHP + move.v); 
+                    }
+                    move.cdActuel = move.cd + 1;
+                    
+                    // SYNCHRONISATION DES COOLDOWNS : Réduction uniquement en fin de tour complet
+                    pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
+                    eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
+                    
+                    isPlayerTurn = true; 
+                    actionEnCours = false; // On libère le verrou pour le joueur
+                    updateUI();
                     if(pHP <= 0) endGame(false);
                 }, 1200);
-            } else { isPlayerTurn = true; updateUI(); }
+            } else { 
+                pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
+                eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
+                isPlayerTurn = true; 
+                actionEnCours = false;
+                updateUI(); 
+            }
         }
 
         function endGame(win) {
