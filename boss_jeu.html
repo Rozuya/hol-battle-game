@@ -3,282 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mode Boss Battle</title>
+    <title>Sélection Boss Battle</title>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: sans-serif; background: #0a0000; color: #fff; margin: 0; padding: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; }
+        * {
+            box-sizing: border-box;
+        }
         
-        /* Boutons du haut (Sauvegarde et Accueil) */
-        .top-controls { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 500px; justify-content: center; }
-        .top-btn { padding: 10px 15px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; color: white; font-size: 0.9rem; }
-        .btn-save { background: #ffaa00; color: black; }
-        .btn-home { background: #555; }
+        body {
+            font-family: sans-serif;
+            background-color: #0a0000;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            /* C'est ce bloc qui centre tout au milieu de l'écran */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; 
+        }
 
-        /* Conteneur principal du combat */
-        .container { width: 100%; max-width: 500px; background: #1a0505; padding: 20px; border-radius: 15px; border: 2px solid #ff4444; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); }
-        .level-title { text-align: center; color: #ffaa00; font-size: 1.4rem; font-weight: bold; margin-top: 0; margin-bottom: 15px; text-transform: uppercase; text-shadow: 0 0 10px #ff0000; }
+        h1 {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 30px;
+        }
+
+        .btn-hero {
+            background: #1a0505;
+            border: 2px solid #ff4444;
+            color: white;
+            padding: 15px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.2s ease-in-out;
+            text-align: center;
+        }
+
+        .btn-hero:hover {
+            background: #ff4444;
+            color: black;
+            box-shadow: 0 0 15px #ff4444;
+        }
+
+        .btn-home {
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-home:hover {
+            background: #555;
+        }
         
-        /* Zone des barres de vie */
-        .status-area { display: flex; gap: 15px; margin-bottom: 15px; }
-        .fighter { flex: 1; text-align: center; }
-        .fighter-name { font-weight: bold; font-size: 1rem; margin-bottom: 5px; }
-        .boss-name { color: #ff4444; }
-        .bar-bg { height: 22px; background: #333; border-radius: 10px; overflow: hidden; border: 1px solid #555; margin-bottom: 5px; }
-        .p-bar { height: 100%; background: #9146ff; width: 100%; transition: width 0.3s ease-out; }
-        .b-bar { height: 100%; background: linear-gradient(90deg, #ff0000, #ffaa00); width: 100%; transition: width 0.3s ease-out; }
-        .hp-text { font-size: 0.9rem; color: #ccc; }
-
-        /* Journal de combat */
-        #log-text { min-height: 45px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; color: #ffaa00; font-style: italic; text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-
-        /* Boutons d'action */
-        .btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .btn { padding: 12px 5px; background: #220000; border: 1px solid #ff4444; color: white; cursor: pointer; border-radius: 8px; font-size: 0.85rem; line-height: 1.3; transition: 0.2s; }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: #555; }
-        .ready { color: #00ff00; font-weight: bold; }
-        .cd { color: #ff4444; font-weight: bold; }
-
-        /* Fenêtre Modale (Victoire/Défaite) */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: #1a0505; padding: 30px; border-radius: 15px; border: 2px solid #ffaa00; text-align: center; width: 100%; max-width: 400px; }
-        .modal-btn { padding: 15px; background: #ffaa00; color: black; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin: 8px; width: 100%; font-size: 1rem; }
-        .modal-btn-home { background: #555; color: white; }
+        /* Ajustement pour les très petits écrans (mobiles étroits) */
+        @media (max-width: 400px) {
+            .grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="endModal" class="modal">
-        <div class="modal-content">
-            <h1 id="modal-title" style="color: #ffaa00; margin-top: 0;"></h1>
-            <p id="modal-desc" style="margin-bottom: 25px;"></p>
-            <div id="modal-buttons" style="display: flex; flex-direction: column; align-items: center;"></div>
-        </div>
+    <h1>Choisis ton héros pour le Mode Boss</h1>
+
+    <div class="grid">
+        <button class="btn-hero" onclick="selectHero('House of Laura')">House of Laura</button>
+        <button class="btn-hero" onclick="selectHero('HOL Rozuya')">HOL Rozuya</button>
+        <button class="btn-hero" onclick="selectHero('HOL Tony')">HOL Tony</button>
+        <button class="btn-hero" onclick="selectHero('HOL Omass')">HOL Omass</button>
+        <button class="btn-hero" onclick="selectHero('K974YT')">K974YT</button>
+        <button class="btn-hero" onclick="selectHero('Dark MortelCygne')">Dark MortelCygne</button>
     </div>
 
-    <div class="top-controls">
-        <button class="top-btn btn-save" onclick="sauvegarderPartie()">💾 SAUVEGARDER</button>
-        <button class="top-btn btn-home" onclick="location.href='index.html'">🏠 ACCUEIL</button>
-    </div>
-
-    <div class="container">
-        <div class="level-title" id="level-display">NIVEAU ? / 15</div>
-        
-        <div class="status-area">
-            <div class="fighter">
-                <div id="p-name" class="fighter-name">Joueur</div>
-                <div class="bar-bg"><div id="p-bar" class="p-bar"></div></div>
-                <div id="p-hp" class="hp-text">? / ? PV</div>
-            </div>
-            <div class="fighter">
-                <div id="e-name" class="fighter-name boss-name">Boss</div>
-                <div class="bar-bg"><div id="e-bar" class="b-bar"></div></div>
-                <div id="e-hp" class="hp-text">? / ? PV</div>
-            </div>
-        </div>
-
-        <div id="log-text">Le combat commence ! À toi de jouer.</div>
-        
-        <div id="btn-grid" class="btn-grid"></div>
-    </div>
+    <button class="btn-home" onclick="location.href='index.html'">Retour à l'accueil</button>
 
     <script>
-        // --- 1. DONNÉES COMPLÈTES DES PERSONNAGES ET BOSS ---
-        const playerChars = {
-            "House of Laura": {hp: 220, skills: [{n:'Chat Spam',v:25,t:'dmg',cd:0}, {n:'BRB',v:40,t:'heal',cd:2}, {n:'Host Raid',v:45,t:'dmg',cd:1}, {n:'Donation',v:60,t:'dmg',cd:2}, {n:'Stream Event',v:90,t:'dmg',cd:3}, {n:'Partner Prime',v:125,t:'dmg',cd:5}]},
-            "HOL Rozuya": {hp: 215, skills: [{n:'Code',v:25,t:'dmg',cd:0}, {n:'Soin',v:45,t:'heal',cd:2}, {n:'Debug',v:40,t:'dmg',cd:1}, {n:'Panic',v:55,t:'dmg',cd:2}, {n:'Backup',v:70,t:'heal',cd:4}, {n:'System',v:115,t:'dmg',cd:5}]},
-            "HOL Tony": {hp: 260, skills: [{n:'Bloc',v:22,t:'dmg',cd:0}, {n:'Soin',v:40,t:'heal',cd:2}, {n:'Cri',v:35,t:'dmg',cd:1}, {n:'Rush',v:45,t:'dmg',cd:2}, {n:'Impact',v:75,t:'dmg',cd:4}, {n:'Mur',v:90,t:'dmg',cd:5}]},
-            "HOL Omass": {hp: 200, skills: [{n:'Rush',v:30,t:'dmg',cd:0}, {n:'Flex',v:35,t:'heal',cd:2}, {n:'Punch',v:45,t:'dmg',cd:1}, {n:'Slam',v:60,t:'dmg',cd:2}, {n:'Fury',v:130,t:'dmg',cd:5}]},
-            "K974YT": {hp: 190, skills: [{n:'Jump',v:35,t:'dmg',cd:0}, {n:'Cut',v:35,t:'heal',cd:2}, {n:'Dash',v:45,t:'dmg',cd:1}, {n:'Slash',v:80,t:'dmg',cd:3}, {n:'Blade',v:100,t:'dmg',cd:4}, {n:'Backstab',v:140,t:'dmg',cd:5}]},
-            "Dark MortelCygne": {hp: 210, skills: [{n:'Ombre',v:25,t:'dmg',cd:0}, {n:'Vampire',v:40,t:'heal',cd:2}, {n:'Griffe',v:45,t:'dmg',cd:1}, {n:'Black',v:70,t:'dmg',cd:2}, {n:'Soul',v:115,t:'dmg',cd:5}]}
-        };
-
-        const bosses = [
-            {n: "Le Noob", hp: 180, s: [{n:'Coup Basique',v:20,t:'dmg',cd:0}, {n:'Potion',v:30,t:'heal',cd:3}]},
-            {n: "Troll du Chat", hp: 200, s: [{n:'Spam',v:25,t:'dmg',cd:0}, {n:'Rage',v:40,t:'dmg',cd:2}]},
-            {n: "Hater Anonyme", hp: 230, s: [{n:'Insulte',v:30,t:'dmg',cd:0}, {n:'Mauvaise Foi',v:45,t:'heal',cd:3}]},
-            {n: "Bot Auto", hp: 260, s: [{n:'Laser',v:35,t:'dmg',cd:0}, {n:'Surcharge',v:55,t:'dmg',cd:2}]},
-            {n: "Modérateur", hp: 300, s: [{n:'Avertissement',v:30,t:'dmg',cd:0}, {n:'Ban Tempo',v:70,t:'dmg',cd:3}, {n:'Soin Mute',v:50,t:'heal',cd:4}]},
-            {n: "Le Sniper", hp: 320, s: [{n:'Tir Rapide',v:40,t:'dmg',cd:0}, {n:'Headshot',v:90,t:'dmg',cd:4}]},
-            {n: "Démon du Lag", hp: 350, s: [{n:'Freeze',v:35,t:'dmg',cd:0}, {n:'Rollback',v:80,t:'heal',cd:4}, {n:'Déconnexion',v:100,t:'dmg',cd:5}]},
-            {n: "Faux Viewer", hp: 380, s: [{n:'Frappe',v:45,t:'dmg',cd:0}, {n:'Absorption',v:60,t:'heal',cd:3}]},
-            {n: "Strike Copie", hp: 420, s: [{n:'Censure',v:50,t:'dmg',cd:0}, {n:'Plainte',v:75,t:'dmg',cd:2}, {n:'Suppression',v:110,t:'dmg',cd:4}]},
-            {n: "Hacker", hp: 460, s: [{n:'Virus',v:45,t:'dmg',cd:0}, {n:'Vol Données',v:60,t:'heal',cd:2}, {n:'DDoS',v:120,t:'dmg',cd:5}]},
-            {n: "Anti-Héros", hp: 500, s: [{n:'Coup Vicieux',v:55,t:'dmg',cd:0}, {n:'Trahison',v:85,t:'dmg',cd:2}, {n:'Régén',v:100,t:'heal',cd:5}]},
-            {n: "Ombre Laura", hp: 550, s: [{n:'Frappe Sombre',v:60,t:'dmg',cd:0}, {n:'Raid Noir',v:90,t:'dmg',cd:2}, {n:'Drain',v:120,t:'heal',cd:4}]},
-            {n: "Boss Faux", hp: 600, s: [{n:'Coup Fatal',v:65,t:'dmg',cd:0}, {n:'Illusion',v:110,t:'dmg',cd:3}, {n:'Soin Absolu',v:150,t:'heal',cd:5}]},
-            {n: "Cauchemar", hp: 680, s: [{n:'Terreur',v:70,t:'dmg',cd:0}, {n:'Glitch Fatal',v:130,t:'dmg',cd:3}]},
-            {n: "L'ALGORITHME", hp: 800, s: [{n:'Code Mortel',v:80,t:'dmg',cd:0}, {n:'Ombre Bannie',v:150,t:'dmg',cd:3}, {n:'Resto',v:200,t:'heal',cd:5}, {n:'OBLI',v:250,t:'dmg',cd:7}]}
-        ];
-
-        // --- 2. INITIALISATION ET SCALING ---
-        let currentLevel = parseInt(localStorage.getItem('bossLevel')) || 1;
-        let pName = localStorage.getItem('bossChar') || "House of Laura";
-        
-        let multiplier = 1 + ((currentLevel - 1) * 0.15); // Augmente les dégâts du joueur
-        
-        // Prépare les stats du joueur
-        let pS = playerChars[pName].skills.map(s => ({...s, v: Math.round(s.v * (s.t === 'dmg' ? multiplier : 1.1)), cdActuel: 0}));
-        let pMaxHP = Math.round(playerChars[pName].hp * (1 + (currentLevel - 1) * 0.2)); 
-        let pHP = pMaxHP;
-        
-        // Prépare les stats du Boss
-        let bossData = bosses[currentLevel - 1];
-        let eName = bossData.n;
-        let eMaxHP = bossData.hp;
-        let eHP = eMaxHP;
-        let eS = bossData.s.map(s => ({...s, cdActuel: 0}));
-        
-        let isPlayerTurn = true;
-
-        // Fonction Sauvegarde manuelle
-        function sauvegarderPartie() {
-            localStorage.setItem('bossLevel', currentLevel);
-            alert("✅ Progression sauvegardée au niveau " + currentLevel);
+        function selectHero(heroName) {
+            // Sauvegarde le choix du joueur et lance le combat
+            localStorage.setItem('bossChar', heroName);
+            window.location.href = 'boss_jeu.html';
         }
-
-        // --- 3. GESTION DE L'INTERFACE (VRAI TOUR PAR TOUR) ---
-        function updateUI() {
-            // Textes statiques
-            document.getElementById('level-display').innerText = `🔥 NIVEAU ${currentLevel} / 15 🔥`;
-            document.getElementById('p-name').innerText = pName;
-            document.getElementById('e-name').innerText = `☠️ ${eName}`;
-            
-            // Mise à jour immédiate des PV et Barres
-            document.getElementById('p-hp').innerText = `${Math.max(0, pHP)} / ${pMaxHP} PV`;
-            document.getElementById('e-hp').innerText = `${Math.max(0, eHP)} / ${eMaxHP} PV`;
-            document.getElementById('p-bar').style.width = (Math.max(0, pHP)/pMaxHP*100) + "%";
-            document.getElementById('e-bar').style.width = (Math.max(0, eHP)/eMaxHP*100) + "%";
-            
-            // Recréation des boutons d'attaque
-            const grid = document.getElementById('btn-grid');
-            grid.innerHTML = '';
-            
-            pS.forEach((s) => {
-                let b = document.createElement('button');
-                b.className = 'btn';
-                let estPret = (s.cdActuel === 0);
-                
-                // Le bouton est grisé si ce n'est pas au joueur de jouer OU si le sort est en CD
-                b.disabled = !isPlayerTurn || !estPret;
-                
-                let typeTexte = s.t === 'dmg' ? 'Dégâts' : 'Soin';
-                let statutCD = estPret ? `<span class="ready">PRÊT</span>` : `<span class="cd">CD: ${s.cdActuel}</span>`;
-                
-                b.innerHTML = `<strong>${s.n}</strong><br>${s.v} ${typeTexte}<br>${statutCD}`;
-                
-                // QUAND LE JOUEUR ATTAQUE :
-                b.onclick = () => {
-                    if(!isPlayerTurn) return; // Sécurité supplémentaire
-                    isPlayerTurn = false; // Fin du tour du joueur
-                    
-                    // 1. Application des dégâts/soins
-                    if(s.t === 'dmg') {
-                        eHP -= s.v;
-                        document.getElementById('log-text').innerText = `${pName} utilise ${s.n} ! Inflige ${s.v} dégâts.`;
-                    } else {
-                        pHP = Math.min(pMaxHP, pHP + s.v);
-                        document.getElementById('log-text').innerText = `${pName} se soigne de ${s.v} PV avec ${s.n}.`;
-                    }
-                    s.cdActuel = s.cd + 1;
-                    
-                    // 2. Mise à jour VISUELLE IMMÉDIATE (les barres baissent, les boutons se grisent)
-                    updateUI();
-                    
-                    // 3. On laisse 1.5s au joueur pour voir son attaque avant que l'IA ne réagisse
-                    setTimeout(() => {
-                        if(eHP <= 0) {
-                            endGame(true);
-                        } else {
-                            aiTurn(); // C'est au tour du boss
-                        }
-                    }, 1500);
-                };
-                grid.appendChild(b);
-            });
-        }
-
-        // --- 4. INTELLIGENCE DU BOSS ---
-        function aiTurn() {
-            let moves = eS.filter(s => s.cdActuel === 0);
-            let move;
-            
-            // IA Intelligente
-            if (currentLevel >= 11 && eHP < (eMaxHP * 0.4) && moves.find(s => s.t === 'heal')) {
-                move = moves.find(s => s.t === 'heal');
-            } else {
-                move = moves.sort((a,b) => b.v - a.v)[0];
-            }
-            
-            // Application des dégâts/soins de l'IA
-            if(move.t === 'dmg') {
-                pHP -= move.v;
-                document.getElementById('log-text').innerText = `Le Boss ${eName} réplique avec ${move.n} et inflige ${move.v} dégâts !`;
-            } else {
-                eHP = Math.min(eMaxHP, eHP + move.v);
-                document.getElementById('log-text').innerText = `Le Boss ${eName} utilise ${move.n} et récupère ${move.v} PV.`;
-            }
-            
-            move.cdActuel = move.cd + 1;
-            
-            // Réduction des Cooldowns
-            pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
-            eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
-            
-            // Fin du tour du Boss, c'est au Joueur
-            isPlayerTurn = true;
-            
-            // Mise à jour visuelle (les barres baissent, les boutons se rallument)
-            updateUI();
-            
-            // Vérification de défaite avec un tout petit délai pour voir la barre à 0
-            if(pHP <= 0) {
-                isPlayerTurn = false; // Bloque les actions
-                updateUI();
-                setTimeout(() => endGame(false), 500);
-            }
-        }
-
-        // --- 5. FIN DE COMBAT ---
-        function endGame(win) {
-            document.getElementById('endModal').style.display = 'flex';
-            document.getElementById('modal-title').innerText = win ? "VICTOIRE !" : "DÉFAITE...";
-            let btnContainer = document.getElementById('modal-buttons');
-            btnContainer.innerHTML = '';
-            
-            if (win) {
-                if (currentLevel < 15) {
-                    document.getElementById('modal-desc').innerText = `Bravo, tu as détruit ${eName} ! Prêt pour le prochain ?`;
-                    let next = document.createElement('button');
-                    next.className = 'modal-btn';
-                    next.innerText = "Niveau Suivant";
-                    next.onclick = () => { localStorage.setItem('bossLevel', currentLevel + 1); location.reload(); };
-                    btnContainer.appendChild(next);
-                } else {
-                    document.getElementById('modal-title').innerText = "LÉGENDE VIVANTE !";
-                    document.getElementById('modal-title').style.color = "#ffd700";
-                    document.getElementById('modal-desc').innerText = "Tu as terrassé l'Algorithme. Le jeu est terminé !";
-                    localStorage.setItem('bossLevel', 1); // Reset pour la prochaine aventure
-                }
-            } else {
-                document.getElementById('modal-desc').innerText = `Tu as été écrasé par ${eName}... Retour au niveau 1.`;
-                localStorage.setItem('bossLevel', 1);
-                let retry = document.createElement('button');
-                retry.className = 'modal-btn';
-                retry.innerText = "Recommencer Niveau 1";
-                retry.onclick = () => location.reload();
-                btnContainer.appendChild(retry);
-            }
-            
-            // Bouton Accueil toujours présent
-            let homeBtn = document.createElement('button');
-            homeBtn.className = 'modal-btn modal-btn-home';
-            homeBtn.innerText = "Retour à l'Accueil";
-            homeBtn.onclick = () => { location.href = 'index.html'; };
-            btnContainer.appendChild(homeBtn);
-        }
-
-        // Lancement de l'affichage initial
-        updateUI();
     </script>
 </body>
 </html>
