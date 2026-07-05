@@ -2,54 +2,35 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HOL BATTLE GAME</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ton Jeu de Combat</title>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: sans-serif; background: #121212; color: #fff; margin: 0; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; }
-        h1 { margin-bottom: 40px; color: #9146ff; text-align: center; }
-        .menu-btn { width: 100%; max-width: 350px; padding: 20px; margin: 10px 0; background: #2a2a2a; border: 2px solid #444; color: white; font-size: 1.2rem; cursor: pointer; border-radius: 10px; transition: 0.3s; font-weight: bold; }
-        .menu-btn:hover { border-color: #9146ff; background: #333; }
-        .boss-btn { border-color: #ff4444; }
-        .boss-btn:hover { border-color: #ff0000; background: #221111; }
-        
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 15px; border: 2px solid #9146ff; max-width: 500px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto; }
-        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; color: white; }
+        body { font-family: sans-serif; background: #0a0000; color: #fff; text-align: center; padding: 20px; }
+        .btn-menu { display: block; width: 250px; margin: 10px auto; padding: 15px; background: #220000; border: 2px solid #ff4444; color: white; cursor: pointer; border-radius: 10px; font-weight: bold; }
+        .btn-menu:hover { background: #440000; }
+        .section-box { max-width: 600px; margin: 20px auto; padding: 20px; background: #1a0505; border-radius: 10px; border: 1px solid #555; text-align: left; }
     </style>
 </head>
 <body>
 
-    <h1>HOL BATTLE GAME</h1>
+    <h1>Bienvenue dans l'Arène</h1>
 
-    <button class="menu-btn" onclick="location.href='difficulte.html'">Jouer (Classique)</button>
-    <button class="menu-btn boss-btn" onclick="location.href='boss_selection.html'">🔥 Mode Boss Battle</button>
-    <button class="menu-btn" onclick="openModal()">Règles & Actus</button>
+    <button class="btn-menu" onclick="location.href='personnage.html'">Mode Classique</button>
+    <button class="btn-menu" style="border-color: #ffaa00;" onclick="location.href='boss_selection.html'">Mode Boss Battle</button>
 
-    <div id="infoModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2 style="color: #9146ff;">📜 Règles & Actualités</h2>
-            
-            <p><strong>Comment jouer :</strong> Choisis ton mode, ton héros, et affronte l'IA. Tu ne tomberas jamais sur ton propre clone !</p>
-            
-            <h3 style="color: #ffaa00;">🔥 NOUVEAU : Mode Boss Battle</h3>
-            <p>• Tente de franchir les <strong>15 niveaux progressifs</strong>. À chaque victoire, tu passes au niveau supérieur avec un adversaire plus fort. Attention : une défaite te ramène au niveau 1 !</p>
-            <p>• <strong>Sauvegarde automatique :</strong> Ta progression est enregistrée. Tu peux fermer le jeu et reprendre ton ascension vers le sommet à tout moment.</p>
-            
-            <h3 style="color: #9146ff;">🛠️ Améliorations Globales</h3>
-            <p>• <strong>Interface tactique :</strong> Les boutons affichent ton temps de recharge (CD). Vert = PRÊT, Rouge = En attente.</p>
-            <p>• <strong>Gameplay équilibré :</strong> Chaque héros possède désormais un soin en 2ème compétence. Les statistiques ont été harmonisées pour garantir que chaque combat soit 100% gagnable avec une bonne stratégie.</p>
-        </div>
+    <div class="section-box">
+        <h2 style="color: #ffaa00;">📜 Règles & Actus</h2>
+        
+        <h3 style="color: #ffaa00;">🔥 NOUVEAU : Mode Boss Battle</h3>
+        <p>• Tente de franchir les <strong>15 niveaux progressifs</strong>. À chaque victoire, tu passes au niveau supérieur avec un adversaire plus fort.</p>
+        <p>• <strong>Montée en puissance :</strong> Tes statistiques (PV et dégâts) augmentent automatiquement à chaque niveau pour te permettre de rivaliser avec les boss les plus redoutables !</p>
+        <p>• <strong>Sauvegarde & Flexibilité :</strong> Tu peux <strong>sauvegarder ta progression</strong> à tout moment. Tu es libre de quitter le combat, faire une pause, et reprendre là où tu t'es arrêté.</p>
+        <p>• <em>Attention : une défaite totale te ramènera au niveau 1. Prudence !</em></p>
+        
+        <h3 style="color: #9146ff;">🛠️ Améliorations Globales</h3>
+        <p>• <strong>Interface tactique :</strong> Les boutons affichent ton temps de recharge (CD). Vert = PRÊT, Rouge = En attente.</p>
+        <p>• <strong>Équilibrage :</strong> Chaque héros possède désormais un soin en 2ème compétence pour durer plus longtemps dans les combats intenses.</p>
     </div>
 
-    <script>
-        function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
-        window.onclick = function(event) {
-            let modal = document.getElementById('infoModal');
-            if (event.target == modal) { closeModal(); }
-        }
-    </script>
 </body>
 </html>
