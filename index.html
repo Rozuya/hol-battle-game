@@ -11,7 +11,6 @@
         .menu-btn { width: 100%; max-width: 350px; padding: 20px; margin: 10px 0; background: #2a2a2a; border: 2px solid #444; color: white; font-size: 1.2rem; cursor: pointer; border-radius: 10px; transition: 0.3s; }
         .menu-btn:hover { border-color: #9146ff; background: #333; }
         
-        /* Modal Styles */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: #1a1a1a; padding: 25px; border-radius: 15px; border: 2px solid #9146ff; max-width: 500px; width: 100%; position: relative; }
         .close-btn { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; color: white; }
@@ -24,15 +23,14 @@
     <button class="menu-btn" onclick="location.href='difficulte.html'">Jouer</button>
     <button class="menu-btn" onclick="openModal()">Règles & Actus</button>
 
-    <!-- Modal Règles & Actus -->
     <div id="infoModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <h2 style="color: #9146ff;">📜 Règles & Actualités</h2>
-            <p><strong>Comment jouer :</strong> Choisis ta difficulté, ton héros, et affronte l'IA (le système t'empêchera toujours de tomber sur ton propre clone !).</p>
-            <p>• <strong>Compétences débloquées :</strong> Facile : 2 | Normal : 4 | Difficile : 6 | Expert : 7.</p>
-            <p>• <strong>Système Anti-Spam :</strong> Le bug du double-clic est corrigé ! Les boutons se verrouillent pendant les attaques pour un combat au tour par tour strict.</p>
-            <p>• <strong>Équilibrage Global :</strong> Les stats ont été ajustées (Soin du Vampire limité, Tank ralenti, Soutien plus résistant). Le mode Expert reste un défi ultime mais <strong>100% gagnable</strong> peu importe ton héros !</p>
+            <p><strong>Comment jouer :</strong> Choisis ta difficulté, ton héros, et affronte l'IA. Tu ne tomberas jamais sur ton propre clone !</p>
+            <p>• <strong>Interface tactique :</strong> Tes boutons affichent désormais ton temps de recharge (CD). Vert = PRÊT, Rouge = En attente.</p>
+            <p>• <strong>Gameplay équilibré :</strong> Chaque héros possède désormais un sort de soin en 2ème compétence pour survivre. Les statistiques ont été harmonisées pour garantir que chaque combat soit gagnable.</p>
+            <p>• <strong>Difficulté :</strong> Le mode Expert est un véritable défi, mais les bonus de l'IA ont été ajustés pour rester surmontables grâce à une bonne gestion de tes cooldowns.</p>
             <p style="color: #00ff00;">🔥 À venir : Mode Boss Battle (15 niveaux) !</p>
         </div>
     </div>
@@ -40,7 +38,6 @@
     <script>
         function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
-        // Fermer le modal en cliquant en dehors
         window.onclick = function(event) {
             let modal = document.getElementById('infoModal');
             if (event.target == modal) { closeModal(); }
