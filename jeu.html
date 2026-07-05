@@ -2,23 +2,86 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Combat HOL - Version Équilibrée par Rôles</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Combat HOL - Ultimate Tactical Edition</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 600px; background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        * { box-sizing: border-box; }
         
-        .health-bar { height: 20px; background: #333; border-radius: 10px; overflow: hidden; margin-top: 5px; border: 1px solid #444; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #121212; 
+            color: #fff; 
+            margin: 0; 
+            padding: 15px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+        
+        .container { 
+            width: 100%; 
+            max-width: 600px; 
+            background: #1a1a1a; 
+            padding: 25px; 
+            border-radius: 15px; 
+            border: 1px solid #333; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+        }
+        
+        /* Zone des barres de vie */
+        .status-area { display: flex; gap: 20px; margin-bottom: 25px; }
+        .player-status { flex: 1; text-align: center; }
+        .char-name { font-weight: bold; margin-bottom: 8px; font-size: 1.1rem; }
+        
+        .health-bar { height: 22px; background: #333; border-radius: 10px; overflow: hidden; border: 1px solid #444; }
         .bar { height: 100%; background: #9146ff; width: 100%; transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .hp-text { font-size: 0.85rem; margin-top: 6px; color: #ccc; }
         
+        /* Animation d'impact */
         .shaking { animation: shake 0.4s; background: #ff4646 !important; }
         @keyframes shake { 0%, 100% {transform: translateX(0)} 25% {transform: translateX(-5px)} 75% {transform: translateX(5px)} }
         
-        .btn { padding: 15px; background: #2a2a2a; border: 1px solid #444; color: white; cursor: pointer; border-radius: 8px; transition: 0.2s; font-size: 0.9rem; }
+        #log { text-align: center; font-size: 1.1rem; color: #9146ff; min-height: 28px; margin: 15px 0; }
+        
+        /* Grille des boutons */
+        #actions { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+            margin-top: 20px; 
+        }
+        
+        .btn { 
+            padding: 15px 10px; 
+            background: #2a2a2a; 
+            border: 1px solid #444; 
+            color: white; 
+            cursor: pointer; 
+            border-radius: 10px; 
+            transition: 0.2s; 
+            font-size: 0.95rem; 
+            user-select: none; 
+            -webkit-tap-highlight-color: transparent;
+        }
         .btn:hover:not(:disabled) { background: #3a3a3a; border-color: #9146ff; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; border: 1px solid #222; }
         
+        /* Modal Pop-up */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 100; }
-        .modal-box { background: #1e1e1e; padding: 30px; border-radius: 15px; border: 2px solid #9146ff; text-align: center; }
+        .modal-box { background: #1e1e1e; padding: 30px; border-radius: 15px; border: 2px solid #9146ff; text-align: center; width: 90%; max-width: 400px; }
+        .modal-btns { margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .modal-btns .btn { flex: 1; min-width: 120px; }
+
+        /* ADAPTATION MOBILE */
+        @media (max-width: 480px) {
+            .container { padding: 15px; }
+            .status-area { gap: 10px; margin-bottom: 15px; }
+            .char-name { font-size: 0.95rem; }
+            .health-bar { height: 18px; }
+            .btn { padding: 12px 5px; font-size: 0.85rem; }
+            #log { font-size: 0.95rem; }
+        }
     </style>
 </head>
 <body>
@@ -26,28 +89,34 @@
     <div id="endModal" class="modal">
         <div class="modal-box">
             <h1 id="modal-title">VICTOIRE</h1>
-            <button class="btn" onclick="location.reload()">Rejouer</button>
+            <div class="modal-btns">
+                <button class="btn" onclick="location.reload()">Rejouer</button>
+                <button class="btn" onclick="window.location.href='index.html'">Accueil</button>
+            </div>
         </div>
     </div>
 
     <div class="container">
-        <div style="display: flex; gap: 20px; margin-bottom: 30px;">
-            <div style="flex: 1; text-align: center;">
-                <div id="p-name" style="font-weight: bold; margin-bottom: 5px;"></div>
+        <div class="status-area">
+            <div class="player-status">
+                <div id="p-name" class="char-name"></div>
                 <div class="health-bar"><div id="p-bar" class="bar"></div></div>
-                <div id="p-hp" style="font-size: 0.8rem; margin-top: 5px;"></div>
+                <div id="p-hp" class="hp-text"></div>
             </div>
-            <div style="flex: 1; text-align: center;">
-                <div id="e-name" style="font-weight: bold; margin-bottom: 5px;"></div>
+            <div class="player-status">
+                <div id="e-name" class="char-name"></div>
                 <div class="health-bar"><div id="e-bar" class="bar" style="background: #ff4646;"></div></div>
-                <div id="e-hp" style="font-size: 0.8rem; margin-top: 5px;"></div>
+                <div id="e-hp" class="hp-text"></div>
             </div>
         </div>
-        <h2 id="log" style="text-align: center; font-size: 1rem; color: #9146ff; min-height: 24px;">À toi de jouer !</h2>
-        <div id="actions" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px;"></div>
+        
+        <h2 id="log">À toi de jouer !</h2>
+        
+        <div id="actions"></div>
     </div>
 
     <script>
+        // L'équilibrage parfait des rôles (PV et listes de sorts progressives)
         const chars = {
             "House of Laura": {hp: 200, skills: [{n:'Chat Spam',v:20,t:'dmg',cd:0}, {n:'BRB',v:30,t:'heal',cd:2}, {n:'Host Raid',v:45,t:'dmg',cd:2}, {n:'Sub Gift',v:40,t:'heal',cd:3}, {n:'Donation',v:65,t:'dmg',cd:2}, {n:'Stream Event',v:90,t:'dmg',cd:4}, {n:'Partner Prime',v:120,t:'dmg',cd:5}]},
             "HOL Rozuya": {hp: 170, skills: [{n:'Code',v:25,t:'dmg',cd:0}, {n:'Soin',v:30,t:'heal',cd:1}, {n:'Debug',v:35,t:'dmg',cd:1}, {n:'Backup',v:60,t:'heal',cd:3}, {n:'Panic',v:55,t:'dmg',cd:2}, {n:'Flash',v:75,t:'dmg',cd:3}, {n:'System',v:110,t:'dmg',cd:5}]},
@@ -57,12 +126,25 @@
             "Dark MortelCygne": {hp: 190, skills: [{n:'Ombre',v:20,t:'dmg',cd:0}, {n:'Vampire',v:40,t:'heal',cd:3}, {n:'Griffe',v:45,t:'dmg',cd:1}, {n:'Night',v:50,t:'dmg',cd:2}, {n:'Black',v:60,t:'dmg',cd:2}, {n:'Étreinte',v:75,t:'dmg',cd:3}, {n:'Soul',v:100,t:'dmg',cd:5}]}
         };
 
+        // Récupération sécurisée du perso et de la difficulté depuis index.html
         let pName = localStorage.getItem('char') || "House of Laura";
-        let diff = parseInt(localStorage.getItem('diff')) || 1; 
-        const skillCounts = {1: 2, 2: 4, 3: 6, 4: 7};
-        const numSkills = skillCounts[diff];
+        let rawDiff = localStorage.getItem('diff') || "1";
+        rawDiff = rawDiff.toLowerCase().trim();
+
+        let diffLevel = 1;
+        let numSkills = 2;
+
+        // Gestion stricte du nombre de compétences (Facile:2, Normal:4, Difficile:6, Expert:7)
+        if (rawDiff === "1" || rawDiff === "facile") { diffLevel = 1; numSkills = 2; }
+        else if (rawDiff === "2" || rawDiff === "normal") { diffLevel = 2; numSkills = 4; }
+        else if (rawDiff === "3" || rawDiff === "difficile") { diffLevel = 3; numSkills = 6; }
+        else if (rawDiff === "4" || rawDiff === "expert") { diffLevel = 4; numSkills = 7; }
+        else { diffLevel = 1; numSkills = 2; }
         
+        // Sélection de l'adversaire (qui n'est pas le joueur)
         const eName = Object.keys(chars).filter(n => n !== pName)[0];
+        
+        // On coupe les listes de sorts selon la difficulté (IA soumise aux mêmes règles)
         let pS = chars[pName].skills.slice(0, numSkills).map(s => ({...s, cdActuel: 0}));
         let eS = chars[eName].skills.slice(0, numSkills).map(s => ({...s, cdActuel: 0}));
         
@@ -86,7 +168,7 @@
                 let b = document.createElement('button');
                 b.className = 'btn';
                 b.disabled = !isPlayerTurn || s.cdActuel > 0;
-                b.innerHTML = `<strong>${s.n}</strong><br><small>${s.t=='dmg'?s.v+' dmg':s.v+' heal'}</small>`;
+                b.innerHTML = `<strong>${s.n}</strong><br><small>${s.t=='dmg'?s.v+' dmg':s.v+' heal'} ${s.cdActuel>0?'(CD:'+s.cdActuel+')':''}</small>`;
                 b.onclick = () => playerMove(i);
                 container.appendChild(b);
             });
@@ -101,21 +183,49 @@
             isPlayerTurn = false;
             updateUI();
             if(eHP <= 0) endGame(true);
-            else setTimeout(aiTurn, 1000);
+            else setTimeout(aiTurn, 1000); // L'IA joue 1 seconde après
         }
 
         function aiTurn() {
+            // Réduction des Cooldowns
             pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
             eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
-            let av = eS.filter(s => s.cdActuel === 0);
-            let move = av[Math.floor(Math.random() * av.length)];
             
+            // On filtre les attaques que l'IA a le droit de lancer ce tour-ci
+            let av = eS.filter(s => s.cdActuel === 0);
+            let move;
+
+            // --- IA AVEC 4 COMPORTEMENTS DISTINCTS TRÈS TRAVAILLÉS ---
+            if(diffLevel === 4) { 
+                // EXPERT (Tactique) : 1. Tuer si possible, 2. Se soigner si danger (<50% HP), 3. Sortir le meilleur sort dispo
+                move = av.find(s => s.t==='dmg' && s.v >= pHP) || 
+                       av.find(s => s.t==='heal' && eHP < chars[eName].hp*0.5) || 
+                       av.sort((a,b) => b.v - a.v)[0]; 
+            }
+            else if(diffLevel === 3) { 
+                // DIFFICILE (Exécuteur) : 1. Tuer si possible, 2. Sortir le meilleur sort dispo (ne se soigne pas tactiquement)
+                move = av.find(s => s.t==='dmg' && s.v >= pHP) || 
+                       av.sort((a,b) => b.v - a.v)[0]; 
+            }
+            else if(diffLevel === 2) { 
+                // NORMAL (Agressif pur) : Utilise toujours le sort qui a la plus grande valeur (Dégât max ou Soin max, sans réfléchir)
+                move = av.sort((a,b) => b.v - a.v)[0];
+            }
+            else { 
+                // FACILE (Aléatoire) : Choisit un sort totalement au pif parmi ceux disponibles
+                move = av[Math.floor(Math.random() * av.length)]; 
+            }
+
+            // Exécution du sort de l'IA
             if(move) {
                 if(move.t === 'dmg') { pHP -= move.v; document.getElementById('p-bar').classList.add('shaking'); setTimeout(()=>document.getElementById('p-bar').classList.remove('shaking'), 400); }
                 else { eHP = Math.min(chars[eName].hp, eHP + move.v); }
                 move.cdActuel = move.cd + 1;
                 document.getElementById('log').innerText = `${eName} utilise ${move.n} !`;
+            } else {
+                document.getElementById('log').innerText = `${eName} attend...`;
             }
+            
             updateUI();
             if(pHP <= 0) endGame(false);
             else { isPlayerTurn = true; renderActions(); }
@@ -124,6 +234,8 @@
         function endGame(win) {
             document.getElementById('endModal').style.display = 'flex';
             document.getElementById('modal-title').innerText = win ? "VICTOIRE !" : "DÉFAITE...";
+            // Change la couleur du texte selon si on gagne ou on perd
+            document.getElementById('modal-title').style.color = win ? "#4caf50" : "#ff4646";
         }
 
         updateUI();
