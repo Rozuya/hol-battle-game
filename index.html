@@ -2,13 +2,17 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ton Jeu de Combat</title>
     <style>
-        body { font-family: sans-serif; background: #0a0000; color: #fff; text-align: center; padding: 20px; }
-        .btn-menu { display: block; width: 250px; margin: 10px auto; padding: 15px; background: #220000; border: 2px solid #ff4444; color: white; cursor: pointer; border-radius: 10px; font-weight: bold; }
-        .btn-menu:hover { background: #440000; }
-        .section-box { max-width: 600px; margin: 20px auto; padding: 20px; background: #1a0505; border-radius: 10px; border: 1px solid #555; text-align: left; }
+        body { font-family: sans-serif; background: #0a0000; color: #fff; text-align: center; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        h1 { margin-bottom: 30px; color: #ff4444; text-shadow: 0 0 10px #ff0000; }
+        .btn-menu { display: block; width: 280px; margin: 15px auto; padding: 18px; background: #220000; border: 2px solid #ff4444; color: white; cursor: pointer; border-radius: 12px; font-weight: bold; font-size: 1rem; transition: 0.3s; }
+        .btn-menu:hover { background: #440000; transform: scale(1.05); }
+        
+        /* Style de la Pop-up */
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; justify-content:center; align-items:center; }
+        .modal-content { background:#1a0505; padding:25px; border-radius:15px; border:2px solid #ffaa00; width:90%; max-width:500px; max-height:80vh; overflow-y:auto; text-align:left; color:white; }
     </style>
 </head>
 <body>
@@ -17,20 +21,31 @@
 
     <button class="btn-menu" onclick="location.href='personnage.html'">Mode Classique</button>
     <button class="btn-menu" style="border-color: #ffaa00;" onclick="location.href='boss_selection.html'">Mode Boss Battle</button>
+    <button class="btn-menu" style="background: #333; border: 1px solid #aaa;" onclick="toggleModal(true)">📜 Règles & Actus</button>
 
-    <div class="section-box">
-        <h2 style="color: #ffaa00;">📜 Règles & Actus</h2>
-        
-        <h3 style="color: #ffaa00;">🔥 NOUVEAU : Mode Boss Battle</h3>
-        <p>• Tente de franchir les <strong>15 niveaux progressifs</strong>. À chaque victoire, tu passes au niveau supérieur avec un adversaire plus fort.</p>
-        <p>• <strong>Montée en puissance :</strong> Tes statistiques (PV et dégâts) augmentent automatiquement à chaque niveau pour te permettre de rivaliser avec les boss les plus redoutables !</p>
-        <p>• <strong>Sauvegarde & Flexibilité :</strong> Tu peux <strong>sauvegarder ta progression</strong> à tout moment. Tu es libre de quitter le combat, faire une pause, et reprendre là où tu t'es arrêté.</p>
-        <p>• <em>Attention : une défaite totale te ramènera au niveau 1. Prudence !</em></p>
-        
-        <h3 style="color: #9146ff;">🛠️ Améliorations Globales</h3>
-        <p>• <strong>Interface tactique :</strong> Les boutons affichent ton temps de recharge (CD). Vert = PRÊT, Rouge = En attente.</p>
-        <p>• <strong>Équilibrage :</strong> Chaque héros possède désormais un soin en 2ème compétence pour durer plus longtemps dans les combats intenses.</p>
+    <div id="rulesModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #ffaa00;">📜 Règles & Actus</h2>
+            
+            <h3 style="color: #ffaa00;">🔥 Mode Boss Battle</h3>
+            <p>• Franchis les <strong>15 niveaux</strong>. À chaque victoire, ton adversaire devient plus fort.</p>
+            <p>• <strong>Montée en puissance :</strong> Tes stats (PV et dégâts) augmentent automatiquement à chaque niveau pour rester compétitif !</p>
+            <p>• <strong>Sauvegarde :</strong> Clique sur 💾 dans le jeu pour enregistrer ta progression et revenir plus tard.</p>
+            <p>• <em>Attention : une défaite totale te ramènera au niveau 1.</em></p>
+            
+            <h3 style="color: #9146ff;">🛠️ Améliorations Globales</h3>
+            <p>• <strong>Interface :</strong> Temps de recharge (CD) visibles sur les boutons.</p>
+            <p>• <strong>Équilibrage :</strong> Soins intégrés à chaque héros pour les longs combats.</p>
+            
+            <button style="width:100%; padding:12px; margin-top:20px; background:#ff4444; border:none; color:white; font-weight:bold; cursor:pointer; border-radius:5px;" onclick="toggleModal(false)">Fermer</button>
+        </div>
     </div>
+
+    <script>
+        function toggleModal(open) {
+            document.getElementById('rulesModal').style.display = open ? 'flex' : 'none';
+        }
+    </script>
 
 </body>
 </html>
