@@ -57,20 +57,22 @@
     </div>
 
     <script>
-        // Les 2 premiers sorts ont été mis à cd:0 ou cd:1 (cooldown très faible)
+        // LISTES TRIÉES PAR PUISSANCE : [Faibles x2, Moyennes x2, Fortes x2, Ultime x1]
         const chars = {
-            "House of Laura": {hp: 200, skills: [{n:'Chat Spam',v:20,t:'dmg',cd:0}, {n:'BRB',v:30,t:'heal',cd:0}, {n:'Host Raid',v:45,t:'dmg',cd:2}, {n:'Sub Gift',v:40,t:'heal',cd:3}, {n:'Donation',v:65,t:'dmg',cd:2}, {n:'Stream Event',v:90,t:'dmg',cd:4}, {n:'Partner Prime',v:120,t:'dmg',cd:5}]},
-            "HOL Rozuya": {hp: 170, skills: [{n:'Code',v:25,t:'dmg',cd:0}, {n:'Soin',v:30,t:'heal',cd:0}, {n:'Debug',v:35,t:'dmg',cd:1}, {n:'Backup',v:60,t:'heal',cd:3}, {n:'Panic',v:55,t:'dmg',cd:2}, {n:'Flash',v:75,t:'dmg',cd:3}, {n:'System',v:110,t:'dmg',cd:5}]},
-            "HOL Tony": {hp: 250, skills: [{n:'Bloc',v:15,t:'dmg',cd:0}, {n:'Cri',v:20,t:'dmg',cd:0}, {n:'Soin',v:35,t:'heal',cd:2}, {n:'Rush',v:40,t:'dmg',cd:2}, {n:'Charge',v:50,t:'dmg',cd:3}, {n:'Impact',v:70,t:'dmg',cd:4}, {n:'Mur',v:110,t:'dmg',cd:6}]},
+            "House of Laura": {hp: 200, skills: [{n:'Chat Spam',v:20,t:'dmg',cd:0}, {n:'BRB',v:30,t:'heal',cd:0}, {n:'Sub Gift',v:40,t:'heal',cd:1}, {n:'Host Raid',v:45,t:'dmg',cd:2}, {n:'Donation',v:65,t:'dmg',cd:2}, {n:'Stream Event',v:90,t:'dmg',cd:3}, {n:'Partner Prime',v:120,t:'dmg',cd:5}]},
+            "HOL Rozuya": {hp: 170, skills: [{n:'Code',v:25,t:'dmg',cd:0}, {n:'Soin',v:30,t:'heal',cd:0}, {n:'Debug',v:35,t:'dmg',cd:1}, {n:'Panic',v:55,t:'dmg',cd:1}, {n:'Backup',v:60,t:'heal',cd:2}, {n:'Flash',v:75,t:'dmg',cd:3}, {n:'System',v:110,t:'dmg',cd:5}]},
+            "HOL Tony": {hp: 250, skills: [{n:'Bloc',v:15,t:'dmg',cd:0}, {n:'Cri',v:20,t:'dmg',cd:0}, {n:'Soin',v:35,t:'heal',cd:1}, {n:'Rush',v:40,t:'dmg',cd:1}, {n:'Charge',v:50,t:'dmg',cd:2}, {n:'Impact',v:70,t:'dmg',cd:3}, {n:'Mur',v:110,t:'dmg',cd:6}]},
             "HOL Omass": {hp: 190, skills: [{n:'Rush',v:22,t:'dmg',cd:0}, {n:'Flex',v:20,t:'heal',cd:0}, {n:'Punch',v:35,t:'dmg',cd:1}, {n:'Slam',v:45,t:'dmg',cd:1}, {n:'Combo',v:55,t:'dmg',cd:2}, {n:'Uppercut',v:75,t:'dmg',cd:3}, {n:'Fury',v:105,t:'dmg',cd:4}]},
-            "K974YT": {hp: 160, skills: [{n:'Jump',v:18,t:'dmg',cd:0}, {n:'Dash',v:30,t:'dmg',cd:0}, {n:'Silent',v:45,t:'dmg',cd:1}, {n:'Cut',v:40,t:'heal',cd:3}, {n:'Slash',v:65,t:'dmg',cd:2}, {n:'Blade',v:90,t:'dmg',cd:4}, {n:'Backstab',v:130,t:'dmg',cd:5}]},
-            "Dark MortelCygne": {hp: 190, skills: [{n:'Ombre',v:20,t:'dmg',cd:0}, {n:'Vampire',v:40,t:'heal',cd:0}, {n:'Griffe',v:45,t:'dmg',cd:1}, {n:'Night',v:50,t:'dmg',cd:2}, {n:'Black',v:60,t:'dmg',cd:2}, {n:'Étreinte',v:75,t:'dmg',cd:3}, {n:'Soul',v:100,t:'dmg',cd:5}]}
+            "K974YT": {hp: 160, skills: [{n:'Jump',v:18,t:'dmg',cd:0}, {n:'Dash',v:30,t:'dmg',cd:0}, {n:'Silent',v:45,t:'dmg',cd:1}, {n:'Cut',v:40,t:'heal',cd:1}, {n:'Slash',v:65,t:'dmg',cd:2}, {n:'Blade',v:90,t:'dmg',cd:3}, {n:'Backstab',v:130,t:'dmg',cd:5}]},
+            "Dark MortelCygne": {hp: 190, skills: [{n:'Ombre',v:20,t:'dmg',cd:0}, {n:'Vampire',v:40,t:'heal',cd:0}, {n:'Griffe',v:45,t:'dmg',cd:1}, {n:'Night',v:50,t:'dmg',cd:1}, {n:'Black',v:60,t:'dmg',cd:2}, {n:'Étreinte',v:75,t:'dmg',cd:3}, {n:'Soul',v:100,t:'dmg',cd:5}]}
         };
 
         let pName = localStorage.getItem('char') || "House of Laura";
-        let rawDiff = localStorage.getItem('diff') || "2"; 
-        let numSkills = parseInt(rawDiff); 
-        let diffLevel = (numSkills === 2) ? 1 : (numSkills === 4) ? 2 : (numSkills === 6) ? 3 : 4;
+        let rawDiff = localStorage.getItem('diff') || "2"; // "2" correspond au niveau Normal (4 sorts)
+        let diffLevel = parseInt(rawDiff);
+
+        // Répartition fixe : 1=Facile(2), 2=Normal(4), 3=Difficile(6), 4=Expert(7)
+        let numSkills = (diffLevel === 1) ? 2 : (diffLevel === 2) ? 4 : (diffLevel === 3) ? 6 : 7;
 
         const eName = Object.keys(chars).filter(n => n !== pName)[0];
         let pS = chars[pName].skills.slice(0, numSkills).map(s => ({...s, cdActuel: 0}));
@@ -107,7 +109,6 @@
             let s = pS[i];
             if(s.t === 'dmg') { eHP -= s.v; }
             else { pHP = Math.min(chars[pName].hp, pHP + s.v); }
-            // CORRECTION : On enlève le "+ 1", le délai est exactement égal au CD défini
             s.cdActuel = s.cd; 
             document.getElementById('log').innerText = `Tu as utilisé ${s.n} !`;
             isPlayerTurn = false;
@@ -122,15 +123,14 @@
             let av = eS.filter(s => s.cdActuel === 0);
             let move;
 
-            if(diffLevel === 4) move = av.find(s => s.t==='dmg' && s.v >= pHP) || av.find(s => s.t==='heal' && eHP < chars[eName].hp*0.5) || av.sort((a,b) => b.v - a.v)[0]; 
-            else if(diffLevel === 3) move = av.find(s => s.t==='dmg' && s.v >= pHP) || av.sort((a,b) => b.v - a.v)[0]; 
-            else if(diffLevel === 2) move = av.sort((a,b) => b.v - a.v)[0];
-            else move = av[Math.floor(Math.random() * av.length)]; 
+            if (diffLevel === 1) move = av.sort((a,b) => a.v - b.v)[0]; 
+            else if (diffLevel === 2) move = av[Math.floor(Math.random() * av.length)]; 
+            else if (diffLevel === 3) move = av.sort((a,b) => b.v - a.v)[0]; 
+            else move = av.find(s => s.t==='dmg' && s.v >= pHP) || av.find(s => s.t==='heal' && eHP < chars[eName].hp*0.5) || av.sort((a,b) => b.v - a.v)[0]; 
 
             if(move) {
                 if(move.t === 'dmg') { pHP -= move.v; }
                 else { eHP = Math.min(chars[eName].hp, eHP + move.v); }
-                // CORRECTION : On enlève le "+ 1" ici aussi
                 move.cdActuel = move.cd; 
                 document.getElementById('log').innerText = `${eName} utilise ${move.n} !`;
             } else { document.getElementById('log').innerText = `${eName} attend...`; }
