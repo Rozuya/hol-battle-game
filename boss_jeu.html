@@ -24,12 +24,12 @@
         .fighter-name { font-weight: bold; font-size: 1rem; margin-bottom: 5px; }
         .boss-name { color: #ff4444; }
         .bar-bg { height: 22px; background: #333; border-radius: 10px; overflow: hidden; border: 1px solid #555; margin-bottom: 5px; }
-        .p-bar { height: 100%; background: #9146ff; width: 100%; transition: width 0.3s; }
-        .b-bar { height: 100%; background: linear-gradient(90deg, #ff0000, #ffaa00); width: 100%; transition: width 0.3s; }
+        .p-bar { height: 100%; background: #9146ff; width: 100%; transition: width 0.3s ease-out; }
+        .b-bar { height: 100%; background: linear-gradient(90deg, #ff0000, #ffaa00); width: 100%; transition: width 0.3s ease-out; }
         .hp-text { font-size: 0.9rem; color: #ccc; }
 
         /* Journal de combat */
-        #log-text { min-height: 45px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; color: #ffaa00; font-style: italic; text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; }
+        #log-text { min-height: 45px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; color: #ffaa00; font-style: italic; text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
 
         /* Boutons d'action */
         .btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -47,7 +47,6 @@
 </head>
 <body>
 
-    <!-- Modale de fin de partie -->
     <div id="endModal" class="modal">
         <div class="modal-content">
             <h1 id="modal-title" style="color: #ffaa00; margin-top: 0;"></h1>
@@ -56,13 +55,11 @@
         </div>
     </div>
 
-    <!-- Boutons du haut -->
     <div class="top-controls">
         <button class="top-btn btn-save" onclick="sauvegarderPartie()">💾 SAUVEGARDER</button>
         <button class="top-btn btn-home" onclick="location.href='index.html'">🏠 ACCUEIL</button>
     </div>
 
-    <!-- Conteneur du jeu -->
     <div class="container">
         <div class="level-title" id="level-display">NIVEAU ? / 15</div>
         
@@ -70,16 +67,16 @@
             <div class="fighter">
                 <div id="p-name" class="fighter-name">Joueur</div>
                 <div class="bar-bg"><div id="p-bar" class="p-bar"></div></div>
-                <div id="p-hp" class="hp-text">? / ?</div>
+                <div id="p-hp" class="hp-text">? / ? PV</div>
             </div>
             <div class="fighter">
                 <div id="e-name" class="fighter-name boss-name">Boss</div>
                 <div class="bar-bg"><div id="e-bar" class="b-bar"></div></div>
-                <div id="e-hp" class="hp-text">? / ?</div>
+                <div id="e-hp" class="hp-text">? / ? PV</div>
             </div>
         </div>
 
-        <div id="log-text">Le combat commence ! Prépare-toi.</div>
+        <div id="log-text">Le combat commence ! À toi de jouer.</div>
         
         <div id="btn-grid" class="btn-grid"></div>
     </div>
@@ -131,7 +128,7 @@
         let eHP = eMaxHP;
         let eS = bossData.s.map(s => ({...s, cdActuel: 0}));
         
-        let isPlayerTurn = true, actionEnCours = false;
+        let isPlayerTurn = true;
 
         // Fonction Sauvegarde manuelle
         function sauvegarderPartie() {
@@ -139,20 +136,20 @@
             alert("✅ Progression sauvegardée au niveau " + currentLevel);
         }
 
-        // --- 3. GESTION DE L'INTERFACE ---
+        // --- 3. GESTION DE L'INTERFACE (VRAI TOUR PAR TOUR) ---
         function updateUI() {
-            // Textes
+            // Textes statiques
             document.getElementById('level-display').innerText = `🔥 NIVEAU ${currentLevel} / 15 🔥`;
             document.getElementById('p-name').innerText = pName;
             document.getElementById('e-name').innerText = `☠️ ${eName}`;
             
-            // PV et Barres
+            // Mise à jour immédiate des PV et Barres
             document.getElementById('p-hp').innerText = `${Math.max(0, pHP)} / ${pMaxHP} PV`;
             document.getElementById('e-hp').innerText = `${Math.max(0, eHP)} / ${eMaxHP} PV`;
             document.getElementById('p-bar').style.width = (Math.max(0, pHP)/pMaxHP*100) + "%";
             document.getElementById('e-bar').style.width = (Math.max(0, eHP)/eMaxHP*100) + "%";
             
-            // Boutons d'attaque
+            // Recréation des boutons d'attaque
             const grid = document.getElementById('btn-grid');
             grid.innerHTML = '';
             
@@ -160,15 +157,21 @@
                 let b = document.createElement('button');
                 b.className = 'btn';
                 let estPret = (s.cdActuel === 0);
-                b.disabled = !isPlayerTurn || actionEnCours || !estPret;
+                
+                // Le bouton est grisé si ce n'est pas au joueur de jouer OU si le sort est en CD
+                b.disabled = !isPlayerTurn || !estPret;
                 
                 let typeTexte = s.t === 'dmg' ? 'Dégâts' : 'Soin';
                 let statutCD = estPret ? `<span class="ready">PRÊT</span>` : `<span class="cd">CD: ${s.cdActuel}</span>`;
                 
                 b.innerHTML = `<strong>${s.n}</strong><br>${s.v} ${typeTexte}<br>${statutCD}`;
                 
+                // QUAND LE JOUEUR ATTAQUE :
                 b.onclick = () => {
-                    actionEnCours = true;
+                    if(!isPlayerTurn) return; // Sécurité supplémentaire
+                    isPlayerTurn = false; // Fin du tour du joueur
+                    
+                    // 1. Application des dégâts/soins
                     if(s.t === 'dmg') {
                         eHP -= s.v;
                         document.getElementById('log-text').innerText = `${pName} utilise ${s.n} ! Inflige ${s.v} dégâts.`;
@@ -177,8 +180,18 @@
                         document.getElementById('log-text').innerText = `${pName} se soigne de ${s.v} PV avec ${s.n}.`;
                     }
                     s.cdActuel = s.cd + 1;
-                    isPlayerTurn = false;
-                    setTimeout(() => { updateUI(); if(eHP <= 0) endGame(true); else aiTurn(); }, 1500);
+                    
+                    // 2. Mise à jour VISUELLE IMMÉDIATE (les barres baissent, les boutons se grisent)
+                    updateUI();
+                    
+                    // 3. On laisse 1.5s au joueur pour voir son attaque avant que l'IA ne réagisse
+                    setTimeout(() => {
+                        if(eHP <= 0) {
+                            endGame(true);
+                        } else {
+                            aiTurn(); // C'est au tour du boss
+                        }
+                    }, 1500);
                 };
                 grid.appendChild(b);
             });
@@ -189,15 +202,14 @@
             let moves = eS.filter(s => s.cdActuel === 0);
             let move;
             
-            // IA Intelligente selon le niveau
+            // IA Intelligente
             if (currentLevel >= 11 && eHP < (eMaxHP * 0.4) && moves.find(s => s.t === 'heal')) {
-                // Les boss HL se soignent s'ils ont moins de 40% de PV
                 move = moves.find(s => s.t === 'heal');
             } else {
-                // Sinon ils font l'attaque qui fait le plus de dégâts disponible
                 move = moves.sort((a,b) => b.v - a.v)[0];
             }
             
+            // Application des dégâts/soins de l'IA
             if(move.t === 'dmg') {
                 pHP -= move.v;
                 document.getElementById('log-text').innerText = `Le Boss ${eName} réplique avec ${move.n} et inflige ${move.v} dégâts !`;
@@ -212,10 +224,18 @@
             pS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
             eS.forEach(s => { if(s.cdActuel > 0) s.cdActuel--; });
             
+            // Fin du tour du Boss, c'est au Joueur
             isPlayerTurn = true;
-            actionEnCours = false;
             
-            if(pHP <= 0) { endGame(false); } else { updateUI(); }
+            // Mise à jour visuelle (les barres baissent, les boutons se rallument)
+            updateUI();
+            
+            // Vérification de défaite avec un tout petit délai pour voir la barre à 0
+            if(pHP <= 0) {
+                isPlayerTurn = false; // Bloque les actions
+                updateUI();
+                setTimeout(() => endGame(false), 500);
+            }
         }
 
         // --- 5. FIN DE COMBAT ---
@@ -235,8 +255,9 @@
                     btnContainer.appendChild(next);
                 } else {
                     document.getElementById('modal-title').innerText = "LÉGENDE VIVANTE !";
+                    document.getElementById('modal-title').style.color = "#ffd700";
                     document.getElementById('modal-desc').innerText = "Tu as terrassé l'Algorithme. Le jeu est terminé !";
-                    localStorage.setItem('bossLevel', 1); // Reset pour la prochaine fois
+                    localStorage.setItem('bossLevel', 1); // Reset pour la prochaine aventure
                 }
             } else {
                 document.getElementById('modal-desc').innerText = `Tu as été écrasé par ${eName}... Retour au niveau 1.`;
@@ -256,7 +277,7 @@
             btnContainer.appendChild(homeBtn);
         }
 
-        // Démarrage initial
+        // Lancement de l'affichage initial
         updateUI();
     </script>
 </body>
